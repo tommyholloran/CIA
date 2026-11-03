@@ -11,7 +11,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
 
   return (
     <div className="mx-auto max-w-xl px-4 py-24 text-center">
-      <h1 className="font-display text-3xl font-bold">Something went wrong</h1>
+      <h1 className="font-display text-2xl uppercase leading-tight sm:text-3xl">Something went wrong</h1>
       <p className="mt-3 text-muted-foreground">
         We couldn&apos;t load this page. Your cart is safe — please try again in a moment.
       </p>

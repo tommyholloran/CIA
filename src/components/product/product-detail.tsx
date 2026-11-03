@@ -70,7 +70,7 @@ export function ProductDetail({ product }: { product: Product }) {
       </div>
 
       <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight">{product.name}</h1>
+        <h1 className="font-display text-2xl uppercase leading-tight sm:text-3xl">{product.name}</h1>
         <p className="mt-2 text-xl" aria-live="polite">
           {formatUsd(priceCents)}
         </p>

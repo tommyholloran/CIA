@@ -39,7 +39,7 @@ async function OrderSummary({ searchParams }: { searchParams: PageProps<"/order/
   if (session.status !== "complete") {
     return (
       <div>
-        <h1 className="font-display text-3xl font-bold">Payment not completed</h1>
+        <h1 className="font-display text-2xl uppercase leading-tight sm:text-3xl">Payment not completed</h1>
         <p className="mt-3 text-muted-foreground">
           This checkout wasn&apos;t completed, so you haven&apos;t been charged. Your cart is still saved.
         </p>
@@ -61,7 +61,7 @@ async function OrderSummary({ searchParams }: { searchParams: PageProps<"/order/
     <div>
       <ClearCartOnMount />
       <p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">Order confirmed</p>
-      <h1 className="mt-2 font-display text-3xl font-bold">Thank you{firstName ? `, ${firstName}` : ""}!</h1>
+      <h1 className="mt-2 font-display text-2xl uppercase leading-tight sm:text-3xl">Thank you{firstName ? `, ${firstName}` : ""}!</h1>
       <p className="mt-3 text-muted-foreground">
         Your order <strong className="text-foreground">#{orderRef(session.id)}</strong> is in.
         {email ? (
@@ -128,7 +128,7 @@ function Row({ label, value }: { label: string; value: string }) {
 function NotFoundMessage() {
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold">We couldn&apos;t find that order</h1>
+      <h1 className="font-display text-2xl uppercase leading-tight sm:text-3xl">We couldn&apos;t find that order</h1>
       <p className="mt-3 text-muted-foreground">
         If you just paid, check your email for a confirmation, or contact{" "}
         <a className="underline" href={`mailto:${brand.supportEmail}`}>

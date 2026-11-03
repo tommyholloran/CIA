@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { brand } from "@/config/brand";
-import { sansFont } from "@/config/fonts";
+import { displayFont, sansFont } from "@/config/fonts";
 import { brandCssVars } from "@/lib/brand-css";
 import { siteUrl } from "@/lib/site";
 import { SiteHeader } from "@/components/site-header";
@@ -21,7 +21,7 @@ export const viewport: Viewport = { themeColor: brand.colors.background };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sansFont.variable} h-full antialiased`} style={brandCssVars()}>
+    <html lang="en" className={`${sansFont.variable} ${displayFont.variable} h-full antialiased`} style={brandCssVars()}>
       <body className="flex min-h-full flex-col font-sans">
         <a
           href="#main"

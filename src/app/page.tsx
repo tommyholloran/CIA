@@ -3,7 +3,7 @@ import Link from "next/link";
 import { brand } from "@/config/brand";
 import { getFeaturedProducts } from "@/lib/catalog";
 import { ProductGrid } from "@/components/product/product-card";
-import { BrandStar } from "@/components/site-header";
+import { BrandStar, Wordmark } from "@/components/wordmark";
 
 export default async function HomePage() {
   const featured = await getFeaturedProducts();
@@ -14,8 +14,11 @@ export default async function HomePage() {
       <section className="on-dark bg-brand-accent text-white">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-12 sm:pb-24 sm:pt-16 md:grid-cols-2">
           <div>
-            <h1 className="font-display text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-7xl">{brand.tagline}</h1>
-            <p className="mt-5 max-w-md text-lg text-white/80">{brand.description}</p>
+            <h1>
+              <Wordmark stacked className="text-[clamp(3rem,15vw,5.75rem)] leading-[0.92]" />
+            </h1>
+            <p className="mt-6 font-display text-xl uppercase text-white sm:text-2xl">{brand.tagline}</p>
+            <p className="mt-3 max-w-md text-lg text-white/80">{brand.description}</p>
             <div className="mt-8 flex flex-wrap items-center gap-5">
               <Link href="/shop" className="rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent hover:bg-white/90">
                 Shop all tees
@@ -41,7 +44,7 @@ export default async function HomePage() {
       {featured.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 py-16" aria-labelledby="featured">
           <div className="flex items-baseline justify-between">
-            <h2 id="featured" className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
+            <h2 id="featured" className="font-display text-2xl uppercase sm:text-3xl">
               Featured
             </h2>
             <Link href="/shop" className="text-sm font-semibold underline underline-offset-4">
@@ -57,7 +60,7 @@ export default async function HomePage() {
       <section className="bg-muted" aria-labelledby="story">
         <div className="mx-auto max-w-2xl px-4 py-16 text-center">
           <BrandStar className="mx-auto h-6 w-6 text-brand-primary" />
-          <h2 id="story" className="mt-3 font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
+          <h2 id="story" className="mt-3 font-display text-2xl uppercase sm:text-3xl">
             Our story
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">{brand.story}</p>

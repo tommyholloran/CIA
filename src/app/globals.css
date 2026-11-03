@@ -14,7 +14,17 @@
   --color-muted-foreground: var(--brand-muted-foreground);
   --color-border: var(--brand-border);
   --font-sans: var(--font-brand-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-brand-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-brand-display), ui-serif, Georgia, serif;
+}
+
+html {
+  /* The display font has one weight; never let the browser fake a bold. */
+  font-synthesis-weight: none;
+}
+
+/* Varsity headings: tight, slightly open tracking reads better than default. */
+.font-display {
+  letter-spacing: 0.005em;
 }
 
 body {

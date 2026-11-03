@@ -35,6 +35,12 @@ npm run lint
 | Shipping rates, allowed countries, order limits | `src/config/shipping.ts` |
 | Static page copy | `src/app/(static)/*/page.tsx` |
 
+## Brand & trademark
+
+- **Display font:** [Alfa Slab One](https://fonts.google.com/specimen/Alfa+Slab+One), a free heavy athletic slab (SIL Open Font License; license in `src/assets/fonts/`). Used for the wordmark and all headings. **Body font:** Figtree, standing in for Proxima Nova (see `src/config/fonts.ts`).
+- **Wordmark:** `src/components/wordmark.tsx` sets "CRAZY IVAN ARMY" in the display font, with the red star. It's set **straight, solid-filled, with no contrasting outline**, on purpose.
+- **Keep it that way.** The colors are the University of Arizona's official Arizona Red and Arizona Blue. Combining those exact colors with Arizona-style jersey lettering (arched, red letters with navy outline) on apparel is the kind of resemblance university licensing offices act on. If "Crazy Ivan" refers to a real athlete, selling merch with it also needs that athlete's NIL agreement. Get a trademark attorney's sign-off before launch.
+
 ## Catalog (Printful)
 
 Products come from your Printful store's **sync products** (`GET /store/products` → `GET /store/products/{id}`), plus one catalog lookup per blank and color for swatch hex codes and the fabric description.

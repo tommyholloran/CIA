@@ -1,17 +1,26 @@
 /**
- * Brand font: Proxima Nova (commercial — requires a web license).
+ * Brand fonts.
  *
- * Until licensed WOFF2 files are added, Figtree (free, Google Fonts) stands in:
- * it's the closest free match to Proxima Nova's proportions.
+ * Display: Alfa Slab One, a free heavy athletic slab (SIL Open Font License,
+ * copy in src/assets/fonts/AlfaSlabOne-OFL.txt). Used for the wordmark and
+ * headings. One weight only; it's heavy by design.
  *
- * TO SWITCH TO PROXIMA NOVA (self-hosted, recommended):
- *   1. Put the licensed files in src/fonts/:
+ * Body: Figtree, a free stand-in for Proxima Nova.
+ *
+ * TO SWITCH BODY TEXT TO PROXIMA NOVA (self-hosted, licensed):
+ *   1. Put the licensed files in src/fonts/ (check the license allows it if the repo is public):
  *        ProximaNova-Regular.woff2, ProximaNova-Semibold.woff2, ProximaNova-Bold.woff2, ProximaNova-Extrabold.woff2
  *   2. Comment out the Figtree block and uncomment the localFont block below.
- *   Nothing else changes — every component uses the --font-brand-sans variable.
  */
 
-import { Figtree } from "next/font/google";
+import { Alfa_Slab_One, Figtree } from "next/font/google";
+
+export const displayFont = Alfa_Slab_One({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-brand-display",
+  display: "swap",
+});
 
 export const sansFont = Figtree({
   subsets: ["latin"],
@@ -33,6 +42,3 @@ export const sansFont = Figtree({
 //   display: "swap",
 //   fallback: ["ui-sans-serif", "system-ui", "Helvetica Neue", "Arial", "sans-serif"],
 // });
-
-/** Headings use the same family; differentiate with weight (700/800), not a second font. */
-export const displayFont = sansFont;
