@@ -1,5 +1,5 @@
 {
-  "name": "store",
+  "name": "crazy-ivan-army",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -24,10 +24,14 @@
     "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "axe-core": "^4.14.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.4",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }

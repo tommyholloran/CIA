@@ -27,7 +27,6 @@ export function SiteFooter() {
           </ul>
         </nav>
         <p className="mt-6">
-          {/* Static year avoids a request-time Date in the cached shell; bump yearly or remove. */}
           © {brand.name}. All rights reserved.
         </p>
       </div>

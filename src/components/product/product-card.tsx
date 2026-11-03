@@ -7,7 +7,8 @@ export function priceLabel(p: Pick<Product, "minPriceCents" | "maxPriceCents">) 
   return p.minPriceCents === p.maxPriceCents ? formatUsd(p.minPriceCents) : `From ${formatUsd(p.minPriceCents)}`;
 }
 
-export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+export function ProductCard({ product, priority = false, headingLevel = 3 }: { product: Product; priority?: boolean; headingLevel?: 2 | 3 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const image = product.images[0]?.url ?? product.thumbnail;
   return (
     <Link href={`/shop/${product.slug}`} className="group block" prefetch>
@@ -28,7 +29,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           </span>
         )}
       </div>
-      <h3 className="mt-3 text-sm font-semibold group-hover:underline underline-offset-4">{product.name}</h3>
+      <Heading className="mt-3 text-sm font-semibold underline-offset-4 group-hover:underline">{product.name}</Heading>
       <p className="mt-1 text-sm text-muted-foreground">{priceLabel(product)}</p>
       {product.colors.length > 1 && (
         <p className="mt-1 text-xs text-muted-foreground">{product.colors.length} colors</p>
@@ -37,12 +38,13 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   );
 }
 
-export function ProductGrid({ products, priorityCount = 0 }: { products: Product[]; priorityCount?: number }) {
+/** headingLevel: 2 when the grid sits directly under the page h1 (Shop), 3 under a section h2 (Home). */
+export function ProductGrid({ products, priorityCount = 0, headingLevel = 3 }: { products: Product[]; priorityCount?: number; headingLevel?: 2 | 3 }) {
   return (
     <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
       {products.map((p, i) => (
         <li key={p.id}>
-          <ProductCard product={p} priority={i < priorityCount} />
+          <ProductCard product={p} priority={i < priorityCount} headingLevel={headingLevel} />
         </li>
       ))}
     </ul>

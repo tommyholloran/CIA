@@ -3,6 +3,41 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getCatalog, getProductBySlug } from "@/lib/catalog";
 import { ProductDetail } from "@/components/product/product-detail";
+import { brand } from "@/config/brand";
+import type { Product } from "@/lib/catalog/types";
+import { siteUrl } from "@/lib/site";
+
+/** schema.org Product data so search results can show price and availability. */
+function productJsonLd(p: Product) {
+  const url = `${siteUrl()}/shop/${p.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProductGroup",
+    name: p.name,
+    url,
+    ...(p.description ? { description: p.description } : {}),
+    image: p.images.slice(0, 8).map((i) => i.url),
+    brand: { "@type": "Brand", name: brand.name },
+    productGroupID: String(p.id),
+    variesBy: [...(p.colors.length ? ["https://schema.org/color"] : []), ...(p.sizes.length ? ["https://schema.org/size"] : [])],
+    hasVariant: p.variants.map((v) => ({
+      "@type": "Product",
+      name: [p.name, v.color, v.size].filter(Boolean).join(" — "),
+      ...(v.sku ? { sku: v.sku } : {}),
+      ...(v.color ? { color: v.color } : {}),
+      ...(v.size ? { size: v.size } : {}),
+      ...(v.image ? { image: v.image } : {}),
+      offers: {
+        "@type": "Offer",
+        url,
+        price: (v.priceCents / 100).toFixed(2),
+        priceCurrency: "USD",
+        availability: v.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+      },
+    })),
+  };
+}
 
 /**
  * The first request for a product not prerendered at build waits for the full
@@ -58,6 +93,11 @@ export default async function ProductPage({ params }: PageProps<"/shop/[slug]">)
         </Link>
       </nav>
       <ProductDetail product={product} />
+      <script
+        type="application/ld+json"
+        // Escape "<" so product text can never close the script tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)).replace(/</g, "\\u003c") }}
+      />
     </div>
   );
 }

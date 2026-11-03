@@ -13,7 +13,7 @@ export default async function ShopPage() {
     <div className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="font-display text-3xl font-bold tracking-tight">Shop</h1>
       <div className="mt-8">
-        {products.length ? <ProductGrid products={products} priorityCount={4} /> : <EmptyCatalog />}
+        {products.length ? <ProductGrid products={products} priorityCount={4} headingLevel={2} /> : <EmptyCatalog />}
       </div>
     </div>
   );

@@ -32,6 +32,11 @@ html:has(dialog[open]) {
   outline-offset: 2px;
 }
 
+/* Navy areas: a navy focus ring would be invisible. */
+.on-dark :focus-visible {
+  outline-color: #ffffff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

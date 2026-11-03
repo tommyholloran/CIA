@@ -2,7 +2,7 @@
 
 Direct-to-consumer storefront: Next.js 16 (App Router), Stripe Checkout + Stripe Tax, Printful (catalog and fulfilment), Resend (email). Deploys to Vercel. No database: Stripe Checkout Session metadata and the Printful order `external_id` link each order across systems.
 
-> This README grows with each build step. Sections marked _(coming)_ are filled in when that step lands.
+**Before launch, work through the [launch checklist](#launch-checklist) at the bottom.**
 
 ## Local setup
 
@@ -28,7 +28,8 @@ npm run lint
 
 | What | File |
 | --- | --- |
-| Brand name, copy, colors, logo | `src/config/brand.ts` |
+| Brand name, copy, colors, logo | `src/config/brand.ts`. Put the logo file in `public/` and set `brand.logo`; light-on-dark, because the header is navy |
+| Favicon / home-screen icon / social share image | `src/app/icon.svg`, `src/app/apple-icon.tsx`, `src/app/opengraph-image.tsx`. Placeholder star mark until there's a logo |
 | Fonts | `src/config/fonts.ts` |
 | Featured products on the home page | `src/config/catalog.ts` |
 | Shipping rates, allowed countries, order limits | `src/config/shipping.ts` |
@@ -167,8 +168,6 @@ curl -s https://api.printful.com/shipping/rates \
 
 Without a Printful account, run `node scripts/mock-printful.mjs` and add `PRINTFUL_API_BASE_URL=http://localhost:4010 PRINTFUL_API_TOKEN=mock`. The mock implements orders too; see what was created at `http://localhost:4010/__orders` (send any `Authorization: Bearer …` header).
 
-## Deploying to Vercel _(coming)_
-
 ## Emails (Resend)
 
 | Email | To | When | Idempotency key |
@@ -224,3 +223,59 @@ PRINTFUL_API_TOKEN=… PRINTFUL_WEBHOOK_SECRET=… node scripts/register-printfu
 It subscribes to the seven events above and prints the result with the secret redacted. Add `PRINTFUL_STORE_ID=…` if your token covers more than one store.
 
 Printful must be able to reach the URL, so it can't be `localhost`. Use a Vercel deployment. To test locally, use a tunnel (e.g. `cloudflared tunnel --url http://localhost:3000`) and register the tunnel URL, then re-register the production URL afterwards. Or skip Printful entirely: with the mock, `POST http://localhost:4010/__ship/{ref}` adds a shipment and returns the exact `package_shipped` payload to POST to your local webhook.
+
+## SEO
+
+- Per-page titles and descriptions. Product pages get their mockup as the share image and a canonical URL.
+- `/sitemap.xml` lists the static pages and every product (refreshed with the catalog). `/robots.txt` blocks `/api/` and `/order/`, and blocks **everything** on Vercel preview deployments so previews never get indexed.
+- Product pages include schema.org `ProductGroup` data (price, availability, color and size per variant), which search results can use for price and stock display.
+- Default social share image: `src/app/opengraph-image.tsx`.
+
+## Deploying to Vercel
+
+1. **Import the repo:** vercel.com → Add New → Project → import `tommyholloran/CIA`. The defaults are right (framework Next.js, `npm run build`).
+2. **Environment variables:** Project → Settings → Environment Variables. Add everything from `.env.example`, **scoped per environment**:
+
+   | Variable | Production | Preview |
+   | --- | --- | --- |
+   | `NEXT_PUBLIC_SITE_URL` | `https://yourdomain.com` | *leave unset*: previews use their own URL automatically |
+   | `STRIPE_SECRET_KEY` | `sk_live_…` | `sk_test_…` |
+   | `STRIPE_WEBHOOK_SECRET` | from the live endpoint (step 5) | from the test endpoint |
+   | `PRINTFUL_AUTO_CONFIRM` | `false` until you trust it, then `true` | `false` |
+   | `PRINTFUL_API_TOKEN`, `PRINTFUL_STORE_ID`, `PRINTFUL_WEBHOOK_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_ALERT_EMAIL`, `REVALIDATE_SECRET` | ✓ | ✓ |
+
+   **Never set** `PRINTFUL_API_BASE_URL`, `STRIPE_API_BASE_URL` or `RESEND_BASE_URL`; they exist only for local mocks. Preview and production share one Printful store, so test-mode orders land there as **drafts**; delete them in Printful after testing.
+3. **Deploy.** The build fetches the catalog from Printful. If Printful is down, the build fails rather than shipping an empty store; redeploy once it's back.
+4. **Domain:** Project → Settings → Domains. Add yours, set `NEXT_PUBLIC_SITE_URL` to match, then redeploy, because `NEXT_PUBLIC_*` values are baked in at build time.
+5. **Stripe webhook:** Stripe Dashboard → Developers → Webhooks → Add endpoint.
+   - URL: `https://yourdomain.com/api/webhooks/stripe`
+   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
+   - Copy the signing secret into `STRIPE_WEBHOOK_SECRET` (Production) and redeploy.
+   - Do the same in **test mode** against a preview URL, saving that secret as the Preview `STRIPE_WEBHOOK_SECRET`.
+   - **Vercel Deployment Protection blocks Stripe and Printful from reaching preview URLs.** Either turn protection off for previews (Settings → Deployment Protection), or use "Protection Bypass for Automation" and add `?x-vercel-protection-bypass=<secret>` to the webhook URL.
+6. **Printful webhook:** run `scripts/register-printful-webhook.mjs` against your production URL (see above).
+7. **Smoke test production** with a real card and a cheap product. Set `PRINTFUL_AUTO_CONFIRM=false` first so the order stays a draft, then refund yourself in Stripe and delete the draft.
+
+## Launch checklist
+
+**Accounts and settings (yours)**
+- [ ] Stripe: business details, Stripe Tax set up with head-office address, **state registrations added** (Stripe collects $0 tax where you aren't registered), payouts bank account, Checkout branding (logo, colors)
+- [ ] Stripe: confirm `PRODUCT_TAX_CODE` (`txcd_30011000`) is the right code for your shirts
+- [ ] Printful: products synced with **retail prices**, billing method added, packing slip and return address set
+- [ ] Printful: confirm the expedited shipping id (`EXPRESS` is unverified; see "Check Printful's shipping method ids") and replace the placeholder print and transit days in `src/config/shipping.ts` with Printful's real times
+- [ ] Printful: consider a resale certificate so Printful doesn't charge **you** sales tax on wholesale costs
+- [ ] Resend: sending domain verified (SPF/DKIM), `EMAIL_FROM` on that domain
+- [ ] Margins: check flat-rate shipping against Printful's real cost for large and expedited orders
+
+**Content (yours)**
+- [ ] `src/config/brand.ts`: tagline, description, story, `supportEmail`, social links
+- [ ] Logo in `public/` + `brand.logo`; replace the star in `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx`
+- [ ] Privacy, Terms, and Shipping & Returns: **replace the placeholder text with reviewed policies** (they're marked `TODO(owner)`)
+- [ ] Featured products in `src/config/catalog.ts` (defaults to the first four)
+- [ ] Brand colors and designs: keep away from University of Arizona marks (see step 1 notes)
+
+**Go-live (together)**
+- [ ] Production env vars set; domain live; `NEXT_PUBLIC_SITE_URL` matches
+- [ ] Stripe live webhook endpoint added; Printful webhook registered to the production URL
+- [ ] One real purchase end to end: confirmation email → draft in Printful → confirm → shipping email
+- [ ] Then set `PRINTFUL_AUTO_CONFIRM=true` if you no longer want to review orders manually
