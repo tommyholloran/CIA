@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { brand } from "@/config/brand";
+import { getFeaturedProducts } from "@/lib/catalog";
+import { ProductGrid } from "@/components/product/product-card";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featured = await getFeaturedProducts();
   return (
     <>
       <section className="bg-muted">
@@ -16,13 +19,22 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-      <section className="mx-auto max-w-6xl px-4 py-16" aria-labelledby="featured">
-        <h2 id="featured" className="font-display text-2xl font-bold">
-          Featured
-        </h2>
-        <p className="mt-2 text-muted-foreground">Featured products load from Printful in the catalog step.</p>
-      </section>
-      <section className="mx-auto max-w-2xl px-4 pb-20 text-center" aria-labelledby="story">
+      {featured.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 py-16" aria-labelledby="featured">
+          <div className="flex items-baseline justify-between">
+            <h2 id="featured" className="font-display text-2xl font-bold">
+              Featured
+            </h2>
+            <Link href="/shop" className="text-sm underline underline-offset-4">
+              View all
+            </Link>
+          </div>
+          <div className="mt-8">
+            <ProductGrid products={featured} />
+          </div>
+        </section>
+      )}
+      <section className="mx-auto max-w-2xl px-4 py-16 text-center" aria-labelledby="story">
         <h2 id="story" className="font-display text-2xl font-bold">
           Our story
         </h2>

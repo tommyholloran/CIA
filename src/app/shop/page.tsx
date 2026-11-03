@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
+import { getCatalog } from "@/lib/catalog";
+import { EmptyCatalog, ProductGrid } from "@/components/product/product-card";
 
-export const metadata: Metadata = { title: "Shop" };
+export const metadata: Metadata = {
+  title: "Shop",
+  description: "Every tee in the collection.",
+};
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await getCatalog();
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="font-display text-3xl font-bold tracking-tight">Shop</h1>
-      <p className="mt-2 text-muted-foreground">Product grid arrives in the catalog step.</p>
+      <div className="mt-8">
+        {products.length ? <ProductGrid products={products} priorityCount={4} /> : <EmptyCatalog />}
+      </div>
     </div>
   );
 }

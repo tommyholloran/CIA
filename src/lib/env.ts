@@ -18,6 +18,18 @@ function read<T extends z.ZodRawShape>(name: string, shape: T): z.infer<z.ZodObj
 
 const nonEmpty = z.string().trim().min(1);
 
+/** Enough to read the catalog. */
+export const printfulToken = () => {
+  const e = read("Printful", {
+    PRINTFUL_API_TOKEN: nonEmpty,
+    PRINTFUL_STORE_ID: z.string().trim().optional(),
+  });
+  return { token: e.PRINTFUL_API_TOKEN, storeId: e.PRINTFUL_STORE_ID || undefined };
+};
+
+export const hasPrintfulToken = () => Boolean(process.env.PRINTFUL_API_TOKEN?.trim());
+
+/** Order creation + webhook handling. */
 export const printfulEnv = () =>
   read("Printful", {
     PRINTFUL_API_TOKEN: nonEmpty,
@@ -26,7 +38,7 @@ export const printfulEnv = () =>
       .enum(["true", "false"])
       .default("false")
       .transform((v) => v === "true"),
-    PRINTFUL_WEBHOOK_SECRET: nonEmpty,
+    PRINTFUL_WEBHOOK_SECRET: z.string().min(32),
   });
 
 export const stripeEnv = () =>
