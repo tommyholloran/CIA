@@ -38,13 +38,7 @@ function deps(): FulfillDeps {
     getPrintfulOrder: getOrderByExternalId,
     createPrintfulOrder: createOrder,
     sendOrderConfirmation,
-    notifyAdmin: async (...args) => {
-      try {
-        await notifyAdmin(...args);
-      } catch (err) {
-        log("error", SCOPE, "admin notification failed", { kind: args[0], ref: args[1], error: errMessage(err) });
-      }
-    },
+    notifyAdmin,
     autoConfirm: printfulEnv().PRINTFUL_AUTO_CONFIRM,
   };
 }

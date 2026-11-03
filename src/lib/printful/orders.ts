@@ -20,13 +20,37 @@ export interface PrintfulOrderRequest {
   retail_costs?: { currency: string; discount: string; shipping: string; tax: string };
 }
 
+export interface PrintfulShipment {
+  id: number;
+  carrier: string | null;
+  service: string | null;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  ship_date?: string | null;
+  reshipment?: boolean;
+  items: { item_id: number; quantity: number }[];
+}
+
 export interface PrintfulOrder {
   id: number;
   external_id: string | null;
-  status: string; // draft | pending | failed | canceled | inprocess | onhold | partial | fulfilled
+  /** draft | pending | failed | canceled | inprocess | onhold | partial | fulfilled */
+  status: string;
   shipping?: string;
   recipient?: { name?: string; email?: string | null };
+  items?: { id: number; name?: string | null; quantity: number }[];
+  shipments?: PrintfulShipment[];
   created?: number;
+}
+
+/** null when the order doesn't exist (or isn't in this store). */
+export async function getOrderById(id: number): Promise<PrintfulOrder | null> {
+  try {
+    return (await printfulRequest<PrintfulOrder>(`/orders/${id}`)).result;
+  } catch (err) {
+    if (err instanceof PrintfulError && err.status === 404) return null;
+    throw err;
+  }
 }
 
 /** null when Printful has no order with this external_id. */

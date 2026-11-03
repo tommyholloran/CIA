@@ -30,7 +30,7 @@ export interface FulfillDeps {
   createPrintfulOrder(body: PrintfulOrderRequest, confirm: boolean): Promise<PrintfulOrder>;
   /** Must be idempotent per ref (Resend idempotency key). Throws on failure. */
   sendOrderConfirmation(data: OrderEmailData): Promise<void>;
-  /** Idempotent per (kind, ref). Best-effort: failures are logged, not thrown. */
+  /** Idempotent per (kind, ref). Throws on failure; fulfilment turns that into a retry. */
   notifyAdmin(kind: AdminNoticeKind, ref: string, subject: string, details: Record<string, unknown>): Promise<void>;
   autoConfirm: boolean;
 }
@@ -69,6 +69,15 @@ function emailData(session: Stripe.Checkout.Session, lineItems: Stripe.LineItem[
   };
 }
 
+/** Admin alerts must arrive: a failed send becomes a webhook retry (deduped by idempotency key). */
+async function alertAdmin(deps: FulfillDeps, ...args: Parameters<FulfillDeps["notifyAdmin"]>) {
+  try {
+    await deps.notifyAdmin(...args);
+  } catch (err) {
+    throw new RetryableError(`admin alert ${args[0]} failed for ${args[1]}: ${errMessage(err)}`);
+  }
+}
+
 const isPermanentPrintfulError = (err: unknown) =>
   err instanceof PrintfulError && err.status >= 400 && err.status < 500 && err.status !== 429 && err.status !== 408;
 
@@ -104,7 +113,7 @@ export async function fulfillCheckoutSession(sessionId: string, deps: FulfillDep
 
   if (!built.ok) {
     log("error", SCOPE, "cannot build Printful order", { ref: built.ref, sessionId, reason: built.reason });
-    await deps.notifyAdmin("order_build_failed", built.ref, `Order #${built.ref} paid but NOT sent to Printful`, {
+    await alertAdmin(deps, "order_build_failed", built.ref, `Order #${built.ref} paid but NOT sent to Printful`, {
       reason: built.reason,
       stripeSession: sessionId,
       action: "Fix the issue and create the Printful order manually, or refund the customer in Stripe.",
@@ -146,7 +155,7 @@ export async function fulfillCheckoutSession(sessionId: string, deps: FulfillDep
       } else if (isPermanentPrintfulError(createErr)) {
         const reason = errMessage(createErr);
         log("error", SCOPE, "Printful rejected order", { ref, sessionId, reason });
-        await deps.notifyAdmin("printful_rejected", ref, `Printful rejected order #${ref}`, {
+        await alertAdmin(deps, "printful_rejected", ref, `Printful rejected order #${ref}`, {
           reason,
           stripeSession: sessionId,
           shipping: built.order.shipping,
@@ -174,8 +183,10 @@ export async function fulfillCheckoutSession(sessionId: string, deps: FulfillDep
     }
   }
 
-  if (status === "created" && draft) {
-    await deps.notifyAdmin("draft_created", ref, `New DRAFT order #${ref} — confirm it in Printful`, {
+  // Sent on every delivery while the order is still a draft: if an earlier
+  // attempt failed to send it, this is the retry (Resend dedupes by key).
+  if (draft) {
+    await alertAdmin(deps, "draft_created", ref, `New DRAFT order #${ref} — confirm it in Printful`, {
       printfulOrderId: order.id,
       shipping: built.order.shipping,
       items: built.order.items.map((i) => `${i.quantity} × ${i.name ?? i.sync_variant_id}`),

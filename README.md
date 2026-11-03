@@ -169,4 +169,58 @@ Without a Printful account, run `node scripts/mock-printful.mjs` and add `PRINTF
 
 ## Deploying to Vercel _(coming)_
 
-## Registering the Printful webhook _(coming)_
+## Emails (Resend)
+
+| Email | To | When | Idempotency key |
+| --- | --- | --- | --- |
+| Order confirmed | customer | Stripe webhook, after the Printful order exists | `order-confirmation/{ref}` |
+| Your order has shipped (tracking) | customer | Printful `package_shipped`; one per package | `shipment/{ref}/{shipmentId}` |
+| New DRAFT order — confirm it | you | each Stripe delivery while the order is still a draft | `admin/draft_created/{ref}` |
+| Paid but NOT sent to Printful | you | order couldn't be built or Printful rejected it | `admin/order_build_failed/{ref}`, `admin/printful_rejected/{ref}` |
+| Order FAILED / CANCELED / ON HOLD / package RETURNED | you | Printful webhook | `admin/printful_order_*/{ref}` |
+
+- Templates are in `src/lib/email/templates.ts`: branded HTML plus a plain-text version, with every dynamic value escaped.
+- Every send goes through `sendEmail()` with an idempotency key. Resend sends at most once per key in 24 hours, so webhook retries never double-email. Templates are deterministic because Resend rejects a reused key whose content differs.
+- **Every email is required.** If any send fails, the webhook answers 500 and Stripe or Printful retries. Admin alerts are also logged at error level before sending, so they show up in Vercel logs even if email is down.
+- Replies go to `brand.supportEmail`.
+
+### Resend setup
+
+1. Add and **verify your sending domain** in Resend (DNS records: SPF, DKIM, optionally DMARC). Verification can take hours, so start early. Until a domain is verified, Resend only delivers to your own account address.
+2. Create an API key with sending access and set `RESEND_API_KEY`.
+3. Set `EMAIL_FROM` to an address on the verified domain, e.g. `Crazy Ivan Army <orders@crazyivanarmy.com>`.
+4. Set `ADMIN_ALERT_EMAIL` to an inbox someone actually reads.
+
+## Printful webhook: shipping emails and alerts
+
+`POST /api/webhooks/printful?secret=…` handles:
+
+| Event | Action |
+| --- | --- |
+| `package_shipped` | email the customer carrier and tracking. Split orders get one email per package, worded "Part of your order…" |
+| `order_failed`, `order_canceled`, `order_put_hold`, `package_returned` | alert you, with Printful's reason and what to do |
+| `product_synced`, `stock_updated` | refresh the cached catalog, so edits in Printful show up without calling `/api/revalidate` |
+
+**Security:** Printful's v1 webhooks are not signed. The handler therefore:
+1. requires the secret in the URL (constant-time compare; 401 otherwise)
+2. **treats the payload only as a pointer.** It re-fetches the order from Printful's API and acts on that. A forged `package_shipped` for an order or shipment that doesn't exist does nothing.
+
+Responses: 401 bad secret · 400 malformed body · 200 handled or ignored · 500 temporary failure (Printful retries).
+
+### Registering the Printful webhook
+
+Printful allows **one** webhook URL per store, so registering replaces any existing configuration. Check first:
+
+```bash
+PRINTFUL_API_TOKEN=… node scripts/register-printful-webhook.mjs --show
+```
+
+Then register, using your **production** URL and the same `PRINTFUL_WEBHOOK_SECRET` that's set in Vercel:
+
+```bash
+PRINTFUL_API_TOKEN=… PRINTFUL_WEBHOOK_SECRET=… node scripts/register-printful-webhook.mjs https://yourdomain.com
+```
+
+It subscribes to the seven events above and prints the result with the secret redacted. Add `PRINTFUL_STORE_ID=…` if your token covers more than one store.
+
+Printful must be able to reach the URL, so it can't be `localhost`. Use a Vercel deployment. To test locally, use a tunnel (e.g. `cloudflared tunnel --url http://localhost:3000`) and register the tunnel URL, then re-register the production URL afterwards. Or skip Printful entirely: with the mock, `POST http://localhost:4010/__ship/{ref}` adds a shipment and returns the exact `package_shipped` payload to POST to your local webhook.

@@ -1,6 +1,7 @@
 import "server-only";
 import { resendEnv } from "@/lib/env";
 import type { AdminNoticeKind, OrderEmailData } from "@/lib/fulfillment/fulfill";
+import type { AdminKind as PrintfulAdminKind } from "@/lib/fulfillment/printful-events";
 import { log } from "@/lib/log";
 import { siteUrl } from "@/lib/site";
 import { sendEmail } from "@/lib/email/send";
@@ -33,7 +34,7 @@ export async function sendShipmentEmail(to: string, data: ShipmentInput, shipmen
   });
 }
 
-export type AdminKind = AdminNoticeKind | "printful_order_failed" | "printful_order_canceled" | "printful_order_on_hold";
+export type AdminKind = AdminNoticeKind | PrintfulAdminKind;
 
 /**
  * Alert the store owner. Logged at error level first so the alert survives in

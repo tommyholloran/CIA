@@ -59,8 +59,9 @@ describe("fulfillCheckoutSession", () => {
     expect(second.status).toBe("exists");
     expect(pf.create).toHaveBeenCalledTimes(1);
     expect(pf.orders.size).toBe(1);
-    expect(deps.notifyAdmin).toHaveBeenCalledTimes(1); // draft notice only on creation
-    expect(deps.sendOrderConfirmation).toHaveBeenCalledTimes(2); // resend is deduped by Resend idempotency key
+    // Both re-sent on redelivery (order still a draft); Resend dedupes by idempotency key.
+    expect(deps.notifyAdmin).toHaveBeenCalledTimes(2);
+    expect(deps.sendOrderConfirmation).toHaveBeenCalledTimes(2);
   });
 
   it("survives concurrent deliveries without a duplicate order", async () => {
@@ -138,6 +139,28 @@ describe("fulfillCheckoutSession", () => {
     await expect(fulfillCheckoutSession("cs_x", deps)).rejects.toBeInstanceOf(RetryableError);
     expect(await fulfillCheckoutSession("cs_x", deps)).toMatchObject({ status: "exists" });
     expect(pf.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries until the draft notice is delivered", async () => {
+    const { deps, pf } = makeDeps();
+    (deps.notifyAdmin as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("resend 500"));
+    await expect(fulfillCheckoutSession("cs_x", deps)).rejects.toBeInstanceOf(RetryableError);
+    expect(await fulfillCheckoutSession("cs_x", deps)).toMatchObject({ status: "exists", draft: true });
+    expect(deps.notifyAdmin).toHaveBeenLastCalledWith("draft_created", ref, expect.any(String), expect.anything());
+    expect(pf.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not re-send the draft notice once the order is confirmed in Printful", async () => {
+    const { deps, pf } = makeDeps();
+    await fulfillCheckoutSession("cs_x", deps);
+    pf.orders.get(ref)!.status = "pending"; // owner confirmed it
+    await fulfillCheckoutSession("cs_x", deps);
+    expect(deps.notifyAdmin).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries if a failure alert can't be sent", async () => {
+    const { deps } = makeDeps({ notifyAdmin: vi.fn(async () => { throw new Error("down"); }) }, paidSession({ metadata: {} }));
+    await expect(fulfillCheckoutSession("cs_x", deps)).rejects.toBeInstanceOf(RetryableError);
   });
 
   it("does not fail fulfilment if writing Stripe metadata fails", async () => {

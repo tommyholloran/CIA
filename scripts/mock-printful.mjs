@@ -12,7 +12,10 @@
  * Orders (in memory, reset on restart):
  *   GET  /orders/@{external_id}    404 if unknown
  *   POST /orders[?confirm=1]       rejects a duplicate external_id with 400, like Printful
+ *   GET  /orders/{id}
  *   GET  /__orders                 debug: list everything created
+ *   POST /__ship/{external_id}     debug: add a shipment and mark the order fulfilled;
+ *                                  then send yourself the package_shipped webhook it prints
  * Set MOCK_ORDER_FAIL=400|500 to make the next POST /orders fail once.
  */
 import { createServer } from "node:http";
@@ -134,6 +137,23 @@ createServer(async (req, res) => {
     return o ? send(res, 200, { code: 200, result: o }) : send(res, 404, { code: 404, result: "Not found", error: { reason: "NotFound", message: "Order not found" } });
   }
 
+  m = /^\/orders\/(\d+)$/.exec(url.pathname);
+  if (m && req.method === "GET") {
+    const o = [...orders.values()].find((x) => x.id === Number(m[1]));
+    return o ? send(res, 200, { code: 200, result: o }) : send(res, 404, { code: 404, result: "Not found", error: { reason: "NotFound", message: "Order not found" } });
+  }
+
+  m = /^\/__ship\/(.+)$/.exec(url.pathname);
+  if (m && req.method === "POST") {
+    const o = orders.get(decodeURIComponent(m[1]));
+    if (!o) return send(res, 404, { code: 404, result: "No such order" });
+    const shipment = { id: 9000 + (o.shipments?.length ?? 0), carrier: "USPS", service: "Ground Advantage", tracking_number: "9400111899223197428490", tracking_url: "https://tools.usps.com/go/TrackConfirmAction?tLabels=9400111899223197428490", ship_date: new Date().toISOString().slice(0, 10), reshipment: false, items: o.items.map((i) => ({ item_id: i.id, quantity: i.quantity })) };
+    o.shipments = [...(o.shipments ?? []), shipment];
+    o.status = "fulfilled";
+    const webhook = { type: "package_shipped", created: Math.floor(Date.now() / 1000), retries: 0, store: 1, data: { shipment: { id: shipment.id }, order: { id: o.id, external_id: o.external_id } } };
+    return send(res, 200, { code: 200, result: { shipment, webhook } });
+  }
+
   if (url.pathname === "/orders" && req.method === "POST") {
     if (failNextOrder) {
       const status = failNextOrder;
@@ -150,7 +170,9 @@ createServer(async (req, res) => {
     const known = new Set(products.flatMap((p) => p.sync_variants.map((v) => v.id)));
     const bad = (body.items || []).find((i) => !known.has(i.sync_variant_id));
     if (bad) return send(res, 400, { code: 400, result: "Bad item", error: { reason: "BadRequest", message: `Unknown sync_variant_id ${bad.sync_variant_id}` } });
-    const order = { id: nextOrderId++, external_id: body.external_id, status: url.searchParams.get("confirm") === "1" ? "pending" : "draft", shipping: body.shipping, recipient: body.recipient, items: body.items, retail_costs: body.retail_costs, created: Math.floor(Date.now() / 1000) };
+    let itemId = 1;
+    const items = body.items.map((i) => ({ ...i, id: itemId++, name: i.name ?? `Variant ${i.sync_variant_id}` }));
+    const order = { id: nextOrderId++, external_id: body.external_id, status: url.searchParams.get("confirm") === "1" ? "pending" : "draft", shipping: body.shipping, recipient: body.recipient, items, retail_costs: body.retail_costs, shipments: [], created: Math.floor(Date.now() / 1000) };
     orders.set(body.external_id, order);
     return send(res, 200, { code: 200, result: order });
   }
