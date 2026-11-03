@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { brand } from "@/config/brand";
+import { CartButton } from "@/components/cart/cart-button";
 
 const nav = [
   { href: "/shop", label: "Shop" },
@@ -20,7 +21,7 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          {/* Cart button is added in the cart step */}
+          <CartButton />
         </nav>
       </div>
     </header>

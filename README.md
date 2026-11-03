@@ -69,6 +69,13 @@ PRINTFUL_API_BASE_URL=http://localhost:4010 PRINTFUL_API_TOKEN=mock npm run dev
 
 Mock image URLs don't resolve, so images show as broken. Never set `PRINTFUL_API_BASE_URL` in Vercel.
 
+## Cart
+
+- Stored in the browser's `localStorage` under `cia-cart`; tabs stay in sync. Corrupt or old-format data resets to an empty cart rather than crashing. If storage is blocked (some private modes), the cart works until the tab closes.
+- Each line stores the variant id and quantity, plus a display snapshot (name, color, size, image, price) so the drawer opens instantly.
+- **Prices are never trusted from the browser.** When the drawer opens, it sends only `{ variantId, quantity }` to `POST /api/cart`, which re-prices each line from the cached catalog. Removed products, sold-out variants, price changes and quantity limits come back as messages shown in the drawer. Checkout (step 4) runs the same validation (`src/lib/cart/validate.ts`).
+- Limits: `MAX_QTY_PER_LINE` and `MAX_LINES_PER_ORDER` in `src/config/shipping.ts`, enforced in the browser and again on the server.
+
 ## Testing webhooks locally with the Stripe CLI _(coming)_
 
 ## Deploying to Vercel _(coming)_

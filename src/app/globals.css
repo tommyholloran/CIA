@@ -22,6 +22,11 @@ body {
   color: var(--color-foreground);
 }
 
+/* Lock page scroll while a modal (cart drawer) is open. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-brand-accent);
   outline-offset: 2px;

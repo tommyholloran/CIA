@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { Product, Variant } from "@/lib/catalog/types";
 import { formatUsd } from "@/lib/money";
+import { useCart } from "@/components/cart/cart-provider";
 
 function findVariant(p: Product, color: string | null, size: string | null): Variant | undefined {
   return p.variants.find((v) => (p.colors.length ? v.color === color : true) && (p.sizes.length ? v.size === size : true));
@@ -15,6 +16,7 @@ export function ProductDetail({ product }: { product: Product }) {
   // Don't preselect a size: picking the wrong one by default causes returns.
   const [size, setSize] = useState<string | null>(product.sizes.length ? null : firstAvailable.size);
   const [imageIndex, setImageIndex] = useState(0);
+  const { add } = useCart();
 
   const variant = findVariant(product, color, size);
   const needsSize = product.sizes.length > 0 && !size;
@@ -139,10 +141,22 @@ export function ProductDetail({ product }: { product: Product }) {
           </fieldset>
         )}
 
-        {/* Wired to the cart in step 3. */}
         <button
           type="button"
-          disabled
+          disabled={!variant || !variant.available}
+          onClick={() => {
+            if (!variant) return;
+            add({
+              variantId: variant.id,
+              productId: product.id,
+              name: product.name,
+              slug: product.slug,
+              color: variant.color,
+              size: variant.size,
+              image: variant.image ?? product.images[0]?.url ?? null,
+              priceCents: variant.priceCents,
+            });
+          }}
           className="mt-8 w-full rounded-full bg-brand-primary px-6 py-4 font-semibold text-brand-primary-foreground disabled:opacity-50"
         >
           {needsSize ? "Select a size" : variant && !variant.available ? "Sold out" : "Add to cart"}
