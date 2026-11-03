@@ -8,6 +8,12 @@
  *
  * Fixture shapes follow Printful's official PHP SDK structures. The first
  * request to /store/products returns 429 once, to exercise the retry path.
+ *
+ * Orders (in memory, reset on restart):
+ *   GET  /orders/@{external_id}    404 if unknown
+ *   POST /orders[?confirm=1]       rejects a duplicate external_id with 400, like Printful
+ *   GET  /__orders                 debug: list everything created
+ * Set MOCK_ORDER_FAIL=400|500 to make the next POST /orders fail once.
  */
 import { createServer } from "node:http";
 
@@ -70,13 +76,18 @@ const products = [
 products[2].sync_product.is_ignored = true;
 
 let served429 = false;
+const orders = new Map();
+let nextOrderId = 5000;
+let failNextOrder = process.env.MOCK_ORDER_FAIL ? Number(process.env.MOCK_ORDER_FAIL) : 0;
 
 const send = (res, status, body) => {
   res.writeHead(status, { "content-type": "application/json", ...(status === 429 ? { "retry-after": "1" } : {}) });
   res.end(JSON.stringify(body));
 };
 
-createServer((req, res) => {
+createServer(async (req, res) => {
+  let raw = "";
+  for await (const chunk of req) raw += chunk;
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const auth = req.headers.authorization ?? "";
   console.log(req.method, url.pathname + url.search);
@@ -113,6 +124,35 @@ createServer((req, res) => {
         product: { id: 71, title: "Bella + Canvas 3001", brand: "Bella + Canvas", model: "3001", description: "Soft, lightweight 100% combed ring-spun cotton.\n• Retail fit\n• Side-seamed" },
       },
     });
+  }
+
+  if (url.pathname === "/__orders") return send(res, 200, { code: 200, result: [...orders.values()] });
+
+  m = /^\/orders\/@(.+)$/.exec(url.pathname);
+  if (m && req.method === "GET") {
+    const o = orders.get(decodeURIComponent(m[1]));
+    return o ? send(res, 200, { code: 200, result: o }) : send(res, 404, { code: 404, result: "Not found", error: { reason: "NotFound", message: "Order not found" } });
+  }
+
+  if (url.pathname === "/orders" && req.method === "POST") {
+    if (failNextOrder) {
+      const status = failNextOrder;
+      failNextOrder = 0;
+      return send(res, status, { code: status, result: "Mock failure", error: { reason: "Mock", message: `Mock failure ${status}` } });
+    }
+    const body = JSON.parse(raw || "{}");
+    if (!body.external_id || !/^[A-Za-z0-9_-]{1,32}$/.test(body.external_id)) {
+      return send(res, 400, { code: 400, result: "Invalid external_id", error: { reason: "BadRequest", message: "external_id must be 1-32 chars [A-Za-z0-9_-]" } });
+    }
+    if (orders.has(body.external_id)) {
+      return send(res, 400, { code: 400, result: "Duplicate", error: { reason: "BadRequest", message: `Order with External ID ${body.external_id} already exists` } });
+    }
+    const known = new Set(products.flatMap((p) => p.sync_variants.map((v) => v.id)));
+    const bad = (body.items || []).find((i) => !known.has(i.sync_variant_id));
+    if (bad) return send(res, 400, { code: 400, result: "Bad item", error: { reason: "BadRequest", message: `Unknown sync_variant_id ${bad.sync_variant_id}` } });
+    const order = { id: nextOrderId++, external_id: body.external_id, status: url.searchParams.get("confirm") === "1" ? "pending" : "draft", shipping: body.shipping, recipient: body.recipient, items: body.items, retail_costs: body.retail_costs, created: Math.floor(Date.now() / 1000) };
+    orders.set(body.external_id, order);
+    return send(res, 200, { code: 200, result: order });
   }
 
   send(res, 404, { code: 404, result: "Not found", error: { reason: "NotFound", message: `No mock for ${url.pathname}` } });

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { MAX_LINES_PER_ORDER, MAX_QTY_PER_LINE, PRODUCTION_DAYS, SHIPPING_OPTIONS } from "@/config/shipping";
 import type { ValidatedLine } from "@/lib/cart/validate";
 import { buildCheckoutSessionParams, decodeCartMetadata, encodeCartMetadata } from "./session";
-import { orderRef } from "./order-ref";
+import { orderRef, PRINTFUL_EXTERNAL_ID } from "./order-ref";
 
 const line = (variantId: number, quantity: number, priceCents = 2800, extra: Partial<ValidatedLine> = {}): ValidatedLine => ({
   variantId, catalogVariantId: 4000 + variantId, productId: 11, name: "Crazy Ivan Logo Tee", slug: "crazy-ivan-logo-tee-11",
@@ -76,8 +76,16 @@ describe("buildCheckoutSessionParams", () => {
 });
 
 describe("orderRef", () => {
-  it("is short, uppercase and stable", () => {
-    expect(orderRef("cs_test_a1B2c3D4e5F6g7H8i9J0")).toBe("F6G7H8I9J0");
-    expect(orderRef("cs_live_a1B2c3D4e5F6g7H8i9J0")).toBe("F6G7H8I9J0");
+  it("is 12 Crockford base32 chars, deterministic, and a valid Printful external_id", () => {
+    const id = "cs_test_a1B2c3D4e5F6g7H8i9J0kLmNoPqRsTuVwXyZ0123456789abcdefghijklmnop";
+    const ref = orderRef(id);
+    expect(ref).toMatch(/^[0-9ABCDEFGHJKMNPQRSTVWXYZ]{12}$/);
+    expect(orderRef(id)).toBe(ref);
+    expect(ref).toMatch(PRINTFUL_EXTERNAL_ID);
+  });
+  it("differs between sessions (incl. test vs live with the same suffix)", () => {
+    expect(orderRef("cs_test_abc123")).not.toBe(orderRef("cs_live_abc123"));
+    const refs = new Set(Array.from({ length: 5000 }, (_, i) => orderRef(`cs_test_${i}`)));
+    expect(refs.size).toBe(5000);
   });
 });
