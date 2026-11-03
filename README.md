@@ -29,7 +29,7 @@ npm run lint
 | What | File |
 | --- | --- |
 | Brand name, copy, colors, logo | `src/config/brand.ts`. Put the logo file in `public/` and set `brand.logo`; light-on-dark, because the header is navy |
-| Favicon / home-screen icon / social share image | `src/app/icon.svg`, `src/app/apple-icon.tsx`, `src/app/opengraph-image.tsx`. Placeholder star mark until there's a logo |
+| Favicon / home-screen icon / social share image | `src/app/icon.tsx`, `src/app/apple-icon.tsx`, `src/app/opengraph-image.tsx`. Generated in the display font ("CIA" monogram and wordmark) until there's a logo |
 | Fonts | `src/config/fonts.ts` |
 | Featured products on the home page | `src/config/catalog.ts` |
 | Shipping rates, allowed countries, order limits | `src/config/shipping.ts` |
@@ -37,8 +37,8 @@ npm run lint
 
 ## Brand & trademark
 
-- **Display font:** [Alfa Slab One](https://fonts.google.com/specimen/Alfa+Slab+One), a free heavy athletic slab (SIL Open Font License; license in `src/assets/fonts/`). Used for the wordmark and all headings. **Body font:** Figtree, standing in for Proxima Nova (see `src/config/fonts.ts`).
-- **Wordmark:** `src/components/wordmark.tsx` sets "CRAZY IVAN ARMY" in the display font, with the red star. It's set **straight, solid-filled, with no contrasting outline**, on purpose.
+- **Display font:** [Big Shoulders](https://fonts.google.com/specimen/Big+Shoulders) at weight 900, a tall, condensed athletic face (SIL Open Font License; license and a static TTF for the generated images in `src/assets/fonts/`). Used for the wordmark and all headings. **Body font:** Figtree, standing in for Proxima Nova (see `src/config/fonts.ts`).
+- **Wordmark:** `src/components/wordmark.tsx` sets "CRAZY IVAN ARMY" in the display font: one line in the header, stacked with a red underline bar in the home hero. It's set **straight, solid white, with no contrasting outline**, on purpose.
 - **Keep it that way.** The colors are the University of Arizona's official Arizona Red and Arizona Blue. Combining those exact colors with Arizona-style jersey lettering (arched, red letters with navy outline) on apparel is the kind of resemblance university licensing offices act on. If "Crazy Ivan" refers to a real athlete, selling merch with it also needs that athlete's NIL agreement. Get a trademark attorney's sign-off before launch.
 
 ## Catalog (Printful)
@@ -275,7 +275,7 @@ Printful must be able to reach the URL, so it can't be `localhost`. Use a Vercel
 
 **Content (yours)**
 - [ ] `src/config/brand.ts`: About-page story, `supportEmail`, social links
-- [ ] Logo in `public/` + `brand.logo`; replace the star in `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx`
+- [ ] Logo in `public/` + `brand.logo`; swap the generated monogram in `icon.tsx`, `apple-icon.tsx` and the wordmark in `opengraph-image.tsx`
 - [ ] Privacy, Terms, and Shipping & Returns: **replace the placeholder text with reviewed policies** (they're marked `TODO(owner)`)
 - [ ] Featured products in `src/config/catalog.ts` (defaults to the first four)
 - [ ] Brand colors and designs: keep away from University of Arizona marks (see step 1 notes)

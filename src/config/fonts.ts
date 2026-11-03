@@ -1,9 +1,10 @@
 /**
  * Brand fonts.
  *
- * Display: Alfa Slab One, a free heavy athletic slab (SIL Open Font License,
- * copy in src/assets/fonts/AlfaSlabOne-OFL.txt). Used for the wordmark and
- * headings. One weight only; it's heavy by design.
+ * Display: Big Shoulders (900), a tall, condensed athletic face (SIL Open Font
+ * License, copy in src/assets/fonts/BigShoulders-OFL.txt). Used for the
+ * wordmark and headings. A static 900 TTF is bundled for the generated
+ * share image and icons, which can't use the variable web font.
  *
  * Body: Figtree, a free stand-in for Proxima Nova.
  *
@@ -13,11 +14,11 @@
  *   2. Comment out the Figtree block and uncomment the localFont block below.
  */
 
-import { Alfa_Slab_One, Figtree } from "next/font/google";
+import { Big_Shoulders, Figtree } from "next/font/google";
 
-export const displayFont = Alfa_Slab_One({
+export const displayFont = Big_Shoulders({
   subsets: ["latin"],
-  weight: "400",
+  weight: "900",
   variable: "--font-brand-display",
   display: "swap",
 });

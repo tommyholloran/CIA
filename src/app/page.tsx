@@ -14,7 +14,7 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-12 sm:pb-24 sm:pt-16 md:grid-cols-2">
           <div>
             <h1>
-              <Wordmark stacked className="text-[clamp(3rem,15vw,5.75rem)] leading-[0.92]" />
+              <Wordmark stacked className="text-[clamp(4.5rem,24vw,8.5rem)] leading-[0.95]" />
             </h1>
             <Link
               href="/shop"
@@ -39,7 +39,7 @@ export default async function HomePage() {
       {featured.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 py-16" aria-labelledby="featured">
           <div className="flex items-baseline justify-between">
-            <h2 id="featured" className="font-display text-2xl uppercase sm:text-3xl">
+            <h2 id="featured" className="font-display text-4xl uppercase leading-none sm:text-5xl">
               Featured
             </h2>
             <Link href="/shop" className="text-sm font-semibold underline underline-offset-4">

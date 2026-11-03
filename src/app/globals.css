@@ -24,7 +24,7 @@ html {
 
 /* Varsity headings: tight, slightly open tracking reads better than default. */
 .font-display {
-  letter-spacing: 0.005em;
+  letter-spacing: 0.02em;
 }
 
 body {

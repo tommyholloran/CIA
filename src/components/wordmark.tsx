@@ -1,54 +1,29 @@
 import { brand } from "@/config/brand";
 
 /**
- * Text wordmark in the varsity display font, used until there's a logo file.
+ * Text wordmark in the athletic condensed display font, used until there's a
+ * logo file.
  *
  * Deliberately NOT styled like any school's jersey lettering: set straight
- * (no arch), solid fill, no contrasting outline. Keep it that way. See the
+ * (no arch), solid white, no contrasting outline. Keep it that way. See the
  * README "Brand & trademark" note.
+ *
+ * - default: one line (header)
+ * - stacked: one word per line with a red underline bar (home hero)
  */
-
-export function BrandStar({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 64 64" aria-hidden="true" className={className}>
-      <path d="M32 11l5.6 12.6 13.7 1.4-10.3 9.2 3 13.5L32 40.8l-12 6.9 3-13.5-10.3-9.2 13.7-1.4z" fill="currentColor" />
-    </svg>
-  );
-}
-
-const STAR_INLINE = "mr-[0.06em] inline-block h-[0.72em] w-[0.72em] -translate-y-[0.04em] align-baseline text-brand-primary";
-
-/**
- * - default: inline text that wraps between words; the star is glued to the
- *   first word so it never sits alone on a line
- * - nowrap: one line (header)
- * - stacked: one word per line, a deliberate lockup (hero)
- */
-export function Wordmark({ className = "", nowrap = false, stacked = false }: { className?: string; nowrap?: boolean; stacked?: boolean }) {
-  const [first, ...rest] = brand.name.split(" ");
-  if (stacked) {
-    return (
-      <span className={`block font-display uppercase ${className}`}>
-        <span className="sr-only">{brand.name}</span>
-        <span className="block whitespace-nowrap" aria-hidden="true">
-          <BrandStar className={STAR_INLINE} />
-          {first}
-        </span>
-        {rest.map((w) => (
-          <span key={w} className="block whitespace-nowrap" aria-hidden="true">
-            {w}
-          </span>
-        ))}
-      </span>
-    );
+export function Wordmark({ className = "", stacked = false }: { className?: string; stacked?: boolean }) {
+  if (!stacked) {
+    return <span className={`whitespace-nowrap font-display uppercase tracking-wide ${className}`}>{brand.name}</span>;
   }
   return (
-    <span className={`font-display uppercase ${nowrap ? "whitespace-nowrap" : ""} ${className}`}>
-      <span className="whitespace-nowrap">
-        <BrandStar className={STAR_INLINE} />
-        {first}
-      </span>
-      {rest.length ? ` ${rest.join(" ")}` : null}
+    <span className={`block font-display uppercase ${className}`}>
+      <span className="sr-only">{brand.name}</span>
+      {brand.name.split(" ").map((word) => (
+        <span key={word} className="block whitespace-nowrap" aria-hidden="true">
+          {word}
+        </span>
+      ))}
+      <span className="mt-[0.18em] block h-[0.09em] w-[1.6em] bg-brand-primary" aria-hidden="true" />
     </span>
   );
 }

@@ -19,7 +19,7 @@ export function SiteHeader() {
             // Set brand.logo to a file in /public (SVG preferred, light-on-dark). Height fixed; width follows the file.
             <Image src={brand.logo} alt={brand.name} width={160} height={32} className="h-8 w-auto" priority />
           ) : (
-            <Wordmark nowrap className="text-[15px] sm:text-xl" />
+            <Wordmark className="text-[22px] leading-none sm:text-2xl" />
           )}
         </Link>
         <nav aria-label="Main" className="flex items-center gap-4 text-sm font-medium sm:gap-6">
