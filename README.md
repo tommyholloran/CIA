@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# T-shirt store
 
-## Getting Started
+Direct-to-consumer storefront: Next.js 16 (App Router), Stripe Checkout + Stripe Tax, Printful (catalog and fulfilment), Resend (email). Deploys to Vercel. No database: Stripe Checkout Session metadata and the Printful order `external_id` link each order across systems.
 
-First, run the development server:
+> This README grows with each build step. Sections marked _(coming)_ are filled in when that step lands.
+
+## Local setup
+
+Requirements: Node 20.9+ (22 LTS recommended), npm.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in values; see comments in the file
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The site renders without any secrets. Each integration only checks its own env vars when it is first used, and fails with a clear `[env] … misconfigured` error if they're missing.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Where to change things
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| What | File |
+| --- | --- |
+| Brand name, copy, colors, logo | `src/config/brand.ts` |
+| Fonts | `src/config/fonts.ts` |
+| Shipping rates, allowed countries, order limits | `src/config/shipping.ts` |
+| Static page copy | `src/app/(static)/*/page.tsx` |
 
-## Learn More
+## Testing webhooks locally with the Stripe CLI _(coming)_
 
-To learn more about Next.js, take a look at the following resources:
+## Deploying to Vercel _(coming)_
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Registering the Printful webhook _(coming)_
