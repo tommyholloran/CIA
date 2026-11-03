@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ProsePage } from "@/components/prose-page";
-import { SHIPPING_OPTIONS } from "@/config/shipping";
+import { PRODUCTION_DAYS, SHIPPING_OPTIONS, deliveryEstimate } from "@/config/shipping";
 import { formatUsd } from "@/lib/money";
 
 export const metadata: Metadata = { title: "Shipping & Returns" };
@@ -9,12 +9,14 @@ export default function ShippingReturnsPage() {
   return (
     <ProsePage title="Shipping & Returns">
       <h2>Shipping</h2>
-      <p>We ship to US addresses. Every shirt is printed to order, which adds 2–5 business days before it ships.</p>
+      <p>
+        We ship to US addresses. Every shirt is printed to order, which takes {PRODUCTION_DAYS.min}–{PRODUCTION_DAYS.max}{" "}
+        business days before it ships. Delivery estimates below include printing.
+      </p>
       <ul className="list-disc pl-5">
         {SHIPPING_OPTIONS.map((o) => (
           <li key={o.id}>
-            {o.label}: {formatUsd(o.amount)} — {o.deliveryEstimate.minBusinessDays}–
-            {o.deliveryEstimate.maxBusinessDays} business days after it ships
+            {o.label}: {formatUsd(o.amount)} — {deliveryEstimate(o).min}–{deliveryEstimate(o).max} business days
           </li>
         ))}
       </ul>

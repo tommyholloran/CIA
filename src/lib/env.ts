@@ -41,6 +41,10 @@ export const printfulEnv = () =>
     PRINTFUL_WEBHOOK_SECRET: z.string().min(32),
   });
 
+/** Enough to create Checkout Sessions and read them back. */
+export const stripeSecretKey = () => read("Stripe", { STRIPE_SECRET_KEY: nonEmpty.startsWith("sk_") }).STRIPE_SECRET_KEY;
+
+/** Webhook verification (step 5). */
 export const stripeEnv = () =>
   read("Stripe", {
     STRIPE_SECRET_KEY: nonEmpty.startsWith("sk_"),

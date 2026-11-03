@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { addLine, emptyCart, itemCount, setQuantity, subtotalCents, type Cart, type CartLine } from "@/lib/cart/cart";
 import type { CartIssue, ValidatedCart } from "@/lib/cart/validate";
 import { cartStore } from "./cart-store";
@@ -22,6 +22,9 @@ interface CartContextValue {
   notices: string[];
   dismissNotices: () => void;
   validation: ValidationState;
+  /** Create a Stripe Checkout Session and redirect. Resolves only on failure. */
+  checkout: () => Promise<void>;
+  checkingOut: boolean;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -80,9 +83,14 @@ function applyValidation(before: Cart, result: ValidatedCart): { cart: Cart; not
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const cart = useSyncExternalStore(cartStore.subscribe, cartStore.getSnapshot, cartStore.getServerSnapshot);
-  const [isOpen, setOpen] = useState(false);
+  // Returning from a canceled Stripe Checkout (?checkout=canceled) starts with the drawer open.
+  // Safe for hydration: isOpen only drives dialog.showModal() in an effect, not markup.
+  const [isOpen, setOpen] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("checkout") === "canceled",
+  );
   const [notices, setNotices] = useState<string[]>([]);
   const [validation, setValidation] = useState<ValidationState>("idle");
+  const [checkingOut, setCheckingOut] = useState(false);
   const requestId = useRef(0);
 
   const validate = useCallback(async () => {
@@ -114,32 +122,99 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const open = useCallback(() => {
+    setOpen(true);
+    void validate();
+  }, [validate]);
+  const close = useCallback(() => setOpen(false), []);
+  const add = useCallback<CartContextValue["add"]>(
+    (line, quantity = 1) => {
+      const result = addLine(cartStore.getSnapshot(), line, quantity);
+      if (result.ok) cartStore.set(result.cart);
+      else setNotices((n) => [...n, result.reason]);
+      setOpen(true);
+      void validate();
+    },
+    [validate],
+  );
+  const setQty = useCallback(
+    (variantId: number, quantity: number) => cartStore.set(setQuantity(cartStore.getSnapshot(), variantId, quantity)),
+    [],
+  );
+  const remove = useCallback((variantId: number) => cartStore.set(setQuantity(cartStore.getSnapshot(), variantId, 0)), []);
+  const clear = useCallback(() => {
+    if (cartStore.getSnapshot().lines.length > 0) cartStore.set(emptyCart());
+  }, []);
+  const dismissNotices = useCallback(() => setNotices([]), []);
+
+  const checkout = useCallback(async () => {
+    const snapshot = cartStore.getSnapshot();
+    if (snapshot.lines.length === 0) return;
+    setCheckingOut(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: snapshot.lines.map(({ variantId, quantity }) => ({ variantId, quantity })) }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string; cart?: ValidatedCart };
+      if (res.ok && data.url) {
+        window.location.assign(data.url);
+        return; // keep the button in its loading state while the browser navigates
+      }
+      if (res.status === 409 && data.cart) {
+        const { cart: next, notices: msgs } = applyValidation(cartStore.getSnapshot(), data.cart);
+        cartStore.set(next);
+        setNotices((n) => [...n, ...msgs, "Please review your cart and check out again."]);
+      } else {
+        setNotices((n) => [...n, data.error ?? "We couldn't start checkout. Please try again."]);
+      }
+    } catch {
+      setNotices((n) => [...n, "Network error — please check your connection and try again."]);
+    }
+    setCheckingOut(false);
+  }, []);
+
+  // Strip ?checkout=canceled from the URL and re-check prices for the reopened cart.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("checkout") !== "canceled") return;
+    url.searchParams.delete("checkout");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    // One-time sync from the URL on mount; validate() sets "checking" state, which
+    // costs a single extra render here. Not a cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void validate();
+  }, [validate]);
+
+  // Back/forward cache: if the user hits Back from Stripe, re-enable the button.
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setCheckingOut(false);
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
+
   const value = useMemo<CartContextValue>(
     () => ({
       cart,
       count: itemCount(cart),
       subtotalCents: subtotalCents(cart),
       isOpen,
-      open: () => {
-        setOpen(true);
-        void validate();
-      },
-      close: () => setOpen(false),
-      add: (line, quantity = 1) => {
-        const result = addLine(cartStore.getSnapshot(), line, quantity);
-        if (result.ok) cartStore.set(result.cart);
-        else setNotices((n) => [...n, result.reason]);
-        setOpen(true);
-        void validate();
-      },
-      setQty: (variantId, quantity) => cartStore.set(setQuantity(cartStore.getSnapshot(), variantId, quantity)),
-      remove: (variantId) => cartStore.set(setQuantity(cartStore.getSnapshot(), variantId, 0)),
-      clear: () => cartStore.set(emptyCart()),
+      open,
+      close,
+      add,
+      setQty,
+      remove,
+      clear,
       notices,
-      dismissNotices: () => setNotices([]),
+      dismissNotices,
       validation,
+      checkout,
+      checkingOut,
     }),
-    [cart, isOpen, notices, validation, validate],
+    [cart, isOpen, open, close, add, setQty, remove, clear, notices, dismissNotices, validation, checkout, checkingOut],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -76,6 +76,33 @@ Mock image URLs don't resolve, so images show as broken. Never set `PRINTFUL_API
 - **Prices are never trusted from the browser.** When the drawer opens, it sends only `{ variantId, quantity }` to `POST /api/cart`, which re-prices each line from the cached catalog. Removed products, sold-out variants, price changes and quantity limits come back as messages shown in the drawer. Checkout (step 4) runs the same validation (`src/lib/cart/validate.ts`).
 - Limits: `MAX_QTY_PER_LINE` and `MAX_LINES_PER_ORDER` in `src/config/shipping.ts`, enforced in the browser and again on the server.
 
+## Checkout (Stripe)
+
+The drawer's **Checkout** button calls `POST /api/checkout` with `{ variantId, quantity }` only. The server:
+
+1. Re-prices the cart from the catalog. If anything changed (item removed, sold out, quantity over the limit), it returns **409** with the corrected cart, and the drawer asks the customer to review before trying again. A different order is never charged silently.
+2. Creates a hosted Stripe Checkout Session with:
+   - one line item per variant at the catalog price, in USD, tax-exclusive, with tax code `PRODUCT_TAX_CODE`
+   - shipping address collection for the US only, and an optional phone number (`COLLECT_PHONE`)
+   - the flat rates from `SHIPPING_OPTIONS`. Delivery estimates shown to the customer are **print time + transit** (`PRODUCTION_DAYS` + `transitBusinessDays`).
+   - `automatic_tax: { enabled: true }`
+   - metadata linking the order to Printful: `metadata.cart = "1100x2,1104x1"`, each product's `variant_id`, and each shipping rate's `option_id`
+3. Redirects to Stripe. Success returns to `/order/success?session_id=…`. Cancel returns to `/shop?checkout=canceled`, which reopens the cart.
+
+The success page reads the session from Stripe on the server, shows the order number (`#` + the last 10 characters of the session id), items and totals, and then clears the cart. It shows only the city and state, not the full address, because the URL ends up in browser history. It is `noindex`.
+
+### One-time Stripe setup
+
+1. **Turn on Stripe Tax:** Dashboard → Tax → set up. Add your head-office address. **Without this, every checkout fails.**
+2. **Add tax registrations** for each state where you're registered to collect sales tax. **Stripe Tax collects nothing in states with no registration**, so tax shows as $0 there. Use Stripe's threshold monitoring to see when you need to register in a new state.
+3. **Check the product tax code.** `PRODUCT_TAX_CODE` (`txcd_30011000`, general clothing) in `src/config/shipping.ts` couldn't be verified while building. Confirm it under Dashboard → Tax → Product tax codes.
+4. Settings → Branding: set your logo and colors so the hosted checkout page matches the site.
+5. Put `STRIPE_SECRET_KEY` (`sk_test_…`) in `.env.local`.
+
+### Test a purchase
+
+Use test card `4242 4242 4242 4242`, any future expiry, any CVC, and a real US address so tax is calculated. Try both shipping options, then check the success page and the payment under Dashboard → Payments (test mode). The metadata on the payment should show `cart`.
+
 ## Testing webhooks locally with the Stripe CLI _(coming)_
 
 ## Deploying to Vercel _(coming)_

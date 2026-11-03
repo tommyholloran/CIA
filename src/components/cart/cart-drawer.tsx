@@ -8,7 +8,8 @@ import { formatUsd } from "@/lib/money";
 import { useCart } from "./cart-provider";
 
 export function CartDrawer() {
-  const { cart, count, subtotalCents, isOpen, close, setQty, remove, notices, dismissNotices, validation } = useCart();
+  const { cart, count, subtotalCents, isOpen, close, setQty, remove, notices, dismissNotices, validation, checkout, checkingOut } =
+    useCart();
   const ref = useRef<HTMLDialogElement>(null);
 
   // Native modal <dialog>: focus trap, Esc, inert background, focus return.
@@ -126,14 +127,16 @@ export function CartDrawer() {
               <span>{formatUsd(subtotalCents)}</span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">Shipping and taxes calculated at checkout.</p>
-            {/* Wired to Stripe Checkout in step 4. */}
             <button
               type="button"
-              disabled
-              className="mt-4 w-full rounded-full bg-brand-primary px-6 py-4 font-semibold text-brand-primary-foreground disabled:opacity-50"
+              onClick={() => void checkout()}
+              disabled={checkingOut || validation === "checking"}
+              aria-busy={checkingOut}
+              className="mt-4 w-full rounded-full bg-brand-primary px-6 py-4 font-semibold text-brand-primary-foreground disabled:opacity-60"
             >
-              {validation === "checking" ? "Checking prices…" : "Checkout"}
+              {checkingOut ? "Redirecting to secure checkout…" : validation === "checking" ? "Checking prices…" : "Checkout"}
             </button>
+            <p className="mt-3 text-center text-xs text-muted-foreground">Secure payment by Stripe. US shipping only.</p>
           </footer>
         )}
       </div>
