@@ -20,7 +20,7 @@ export interface OrderEmailData {
   shipTo: string | null;
 }
 
-export type AdminNoticeKind = "order_build_failed" | "printful_rejected" | "draft_created" | "metadata_update_failed";
+export type AdminNoticeKind = "order_build_failed" | "printful_rejected" | "draft_created";
 
 export interface FulfillDeps {
   retrieveSession(id: string): Promise<Stripe.Checkout.Session>;
