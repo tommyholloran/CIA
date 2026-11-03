@@ -11,8 +11,7 @@ import { CartDrawer } from "@/components/cart/cart-drawer";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: { default: `${brand.name} — ${brand.tagline}`, template: `%s | ${brand.name}` },
-  description: brand.description,
+  title: { default: brand.name, template: `%s | ${brand.name}` },
   openGraph: { siteName: brand.name, type: "website", locale: "en_US" },
   twitter: { card: "summary_large_image" },
 };

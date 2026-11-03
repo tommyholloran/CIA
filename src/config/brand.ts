@@ -2,12 +2,10 @@
  * Brand configuration — the single place to change name, copy and colors.
  * Fonts live in ./fonts.ts (next/font must be called in its own module).
  *
- * Copy (tagline/description/story/supportEmail) is still PLACEHOLDER — replace before launch.
+ * Copy (story/supportEmail) is still PLACEHOLDER — replace before launch.
  */
 export const brand = {
   name: "Crazy Ivan Army",
-  tagline: "Tees worth wearing.",
-  description: "Small-batch graphic tees, printed on demand and shipped across the US.",
   story:
     "Placeholder brand story. Two or three sentences about why this brand exists and what makes the shirts worth buying.",
   /** Customer-facing support address (shown on Contact page, used as reply-to). */

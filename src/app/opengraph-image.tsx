@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { brand } from "@/config/brand";
 
-export const alt = `${brand.name} — ${brand.tagline}`;
+export const alt = brand.name;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,7 +26,6 @@ export default async function OpengraphImage() {
             ))}
           </div>
         </div>
-        <div style={{ marginTop: 36, fontSize: 40, color: "#ffffff", opacity: 0.85 }}>{brand.tagline.toUpperCase()}</div>
         <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 18, background: c.primary }} />
       </div>
     ),

@@ -1,9 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { brand } from "@/config/brand";
 import { getFeaturedProducts } from "@/lib/catalog";
 import { ProductGrid } from "@/components/product/product-card";
-import { BrandStar, Wordmark } from "@/components/wordmark";
+import { Wordmark } from "@/components/wordmark";
 
 export default async function HomePage() {
   const featured = await getFeaturedProducts();
@@ -17,16 +16,12 @@ export default async function HomePage() {
             <h1>
               <Wordmark stacked className="text-[clamp(3rem,15vw,5.75rem)] leading-[0.92]" />
             </h1>
-            <p className="mt-6 font-display text-xl uppercase text-white sm:text-2xl">{brand.tagline}</p>
-            <p className="mt-3 max-w-md text-lg text-white/80">{brand.description}</p>
-            <div className="mt-8 flex flex-wrap items-center gap-5">
-              <Link href="/shop" className="rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent hover:bg-white/90">
-                Shop all tees
-              </Link>
-              <Link href="/about" className="font-semibold underline-offset-4 hover:underline">
-                Our story →
-              </Link>
-            </div>
+            <Link
+              href="/shop"
+              className="mt-10 inline-block rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent hover:bg-white/90"
+            >
+              Shop all tees
+            </Link>
           </div>
           {heroImage && (
             <Link
@@ -56,30 +51,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      <section className="bg-muted" aria-labelledby="story">
-        <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-          <BrandStar className="mx-auto h-6 w-6 text-brand-primary" />
-          <h2 id="story" className="mt-3 font-display text-2xl uppercase sm:text-3xl">
-            Our story
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">{brand.story}</p>
-          <ul className="mt-10 grid gap-6 text-sm sm:grid-cols-3">
-            <li>
-              <p className="font-bold">Printed to order</p>
-              <p className="mt-1 text-muted-foreground">No warehouse, no waste.</p>
-            </li>
-            <li>
-              <p className="font-bold">Ships across the US</p>
-              <p className="mt-1 text-muted-foreground">Tracking emailed when it ships.</p>
-            </li>
-            <li>
-              <p className="font-bold">Secure checkout</p>
-              <p className="mt-1 text-muted-foreground">Payments by Stripe.</p>
-            </li>
-          </ul>
-        </div>
-      </section>
     </>
   );
 }

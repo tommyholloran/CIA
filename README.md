@@ -274,7 +274,7 @@ Printful must be able to reach the URL, so it can't be `localhost`. Use a Vercel
 - [ ] Margins: check flat-rate shipping against Printful's real cost for large and expedited orders
 
 **Content (yours)**
-- [ ] `src/config/brand.ts`: tagline, description, story, `supportEmail`, social links
+- [ ] `src/config/brand.ts`: About-page story, `supportEmail`, social links
 - [ ] Logo in `public/` + `brand.logo`; replace the star in `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx`
 - [ ] Privacy, Terms, and Shipping & Returns: **replace the placeholder text with reviewed policies** (they're marked `TODO(owner)`)
 - [ ] Featured products in `src/config/catalog.ts` (defaults to the first four)
