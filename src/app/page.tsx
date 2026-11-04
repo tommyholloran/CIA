@@ -10,15 +10,26 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="on-dark bg-brand-accent text-white">
+      <section className="on-dark overflow-hidden bg-brand-accent text-white">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-12 sm:pb-24 sm:pt-16 md:grid-cols-2">
-          <div>
-            <h1>
+          <div className="relative">
+            {/* Decorative line art behind the wordmark. Faded so the letters stay readable. */}
+            <Image
+              src="/hero-player.png"
+              alt=""
+              aria-hidden="true"
+              width={520}
+              height={941}
+              priority
+              sizes="(min-width: 768px) 320px, 60vw"
+              className="pointer-events-none absolute -top-10 left-[38%] h-[130%] w-auto max-w-none select-none opacity-25 sm:left-[42%]"
+            />
+            <h1 className="relative">
               <Wordmark stacked className="text-[clamp(4.5rem,24vw,8.5rem)] leading-[0.95]" />
             </h1>
             <Link
               href="/shop"
-              className="mt-10 inline-block rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent hover:bg-white/90"
+              className="relative mt-10 inline-block rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent hover:bg-white/90"
             >
               Shop all tees
             </Link>
