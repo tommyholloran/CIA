@@ -13,15 +13,8 @@ const nav = [
 export function SiteHeader() {
   return (
     <header className="on-dark sticky top-0 z-30 bg-brand-accent text-white">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="min-w-0" aria-label={`${brand.name} home`}>
-          {brand.logo ? (
-            // Set brand.logo to a file in /public (SVG preferred, light-on-dark). Height fixed; width follows the file.
-            <Image src={brand.logo} alt={brand.name} width={160} height={32} className="h-8 w-auto" priority />
-          ) : (
-            <Wordmark className="text-[22px] leading-none [text-shadow:2px_2px_0_var(--color-brand-primary)] sm:text-2xl" />
-          )}
-        </Link>
+      {/* Three columns: menu left, wordmark centered, cart right. Side columns are equal width so the wordmark is truly centered. */}
+      <div className="mx-auto grid h-14 max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4">
         <nav aria-label="Main" className="flex items-center gap-4 text-sm font-medium sm:gap-6">
           {nav.map((item) => (
             // Phones: only Shop fits beside the wordmark; About/FAQ are in the footer.
@@ -29,8 +22,18 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <CartButton />
         </nav>
+        <Link href="/" className="justify-self-center" aria-label={`${brand.name} home`}>
+          {brand.logo ? (
+            // Set brand.logo to a file in /public (SVG preferred, light-on-dark). Height fixed; width follows the file.
+            <Image src={brand.logo} alt={brand.name} width={160} height={32} className="h-8 w-auto" priority />
+          ) : (
+            <Wordmark className="text-[20px] leading-none [text-shadow:2px_2px_0_var(--color-brand-primary)] sm:text-[28px]" />
+          )}
+        </Link>
+        <div className="flex justify-end">
+          <CartButton />
+        </div>
       </div>
     </header>
   );
