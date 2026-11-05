@@ -28,7 +28,7 @@ function End() {
 export function CourtBackdrop({ className = "" }: { className?: string }) {
   return (
     <div className={`pointer-events-none select-none ${className}`} aria-hidden="true">
-      <svg viewBox="-80 -180 1100 860" preserveAspectRatio="xMidYMid slice" className="h-full w-full" fill="none" stroke={LINE} strokeWidth="4" strokeLinecap="round">
+      <svg viewBox="80 -50 780 600" preserveAspectRatio="xMidYMid slice" className="h-full w-full" fill="none" stroke={LINE} strokeWidth="4" strokeLinecap="round">
         <g transform="rotate(-20 470 250)">
           <rect x="0" y="0" width="940" height="500" />
           <line x1="470" y1="0" x2="470" y2="500" />

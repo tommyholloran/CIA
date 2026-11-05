@@ -108,3 +108,46 @@ html:has(dialog[open]) {
     transform: none;
   }
 }
+
+/* Hero player entrance: on page load he screams and flexes once (surge + shake,
+   shadow kick, shout burst), then settles to the still. ~1.8s after a short delay. */
+@keyframes player-hype {
+  0% { transform: scale(1) rotate(0); }
+  14% { transform: scale(1.045) rotate(-1.4deg); }
+  24% { transform: scale(1.055) rotate(1.4deg); }
+  34% { transform: scale(1.05) rotate(-1deg); }
+  44% { transform: scale(1.045) rotate(0.8deg); }
+  54% { transform: scale(1.035) rotate(-0.4deg); }
+  70% { transform: scale(1.015) rotate(0); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes player-shadow {
+  0%, 100% { filter: drop-shadow(6px 6px 0 var(--color-brand-primary)); }
+  14%, 60% { filter: drop-shadow(13px 11px 0 var(--color-brand-primary)); }
+}
+@keyframes player-shout {
+  0% { opacity: 0; transform: scale(0.7); }
+  12% { opacity: 1; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.08); }
+  62% { opacity: 0; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+.player-hype {
+  transform-origin: 50% 100%;
+  animation: player-hype 1.8s ease-out 0.5s 1 both;
+}
+.player-shadow {
+  filter: drop-shadow(6px 6px 0 var(--color-brand-primary));
+  animation: player-shadow 1.8s ease-out 0.5s 1 both;
+}
+.player-shout {
+  opacity: 0;
+  animation: player-shout 1.8s ease-out 0.5s 1 both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .player-hype,
+  .player-shadow,
+  .player-shout {
+    animation: none !important;
+  }
+}
