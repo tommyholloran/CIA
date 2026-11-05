@@ -16,10 +16,7 @@ export function SiteFooter() {
     <footer className="on-dark mt-auto bg-brand-accent text-white">
       <div className="h-1.5 bg-brand-primary" aria-hidden="true" />
       <div className="mx-auto max-w-6xl px-4 py-12">
-        <p className="font-display text-4xl uppercase tracking-[0.12em] [text-shadow:2px_2px_0_var(--color-brand-primary)] sm:text-5xl">
-          Join the army
-        </p>
-        <nav aria-label="Footer" className="mt-8 text-sm">
+        <nav aria-label="Footer" className="text-sm">
           <ul className="flex flex-wrap gap-x-6 gap-y-3">
             {links.map((l) => (
               <li key={l.href}>
