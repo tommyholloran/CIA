@@ -27,9 +27,12 @@ export default async function HomePage() {
             <h1 className="relative">
               <Wordmark stacked className="text-[clamp(4.5rem,24vw,8.5rem)] leading-[0.95] [text-shadow:0.045em_0.045em_0_var(--color-brand-primary)]" />
             </h1>
+            <p className="relative mt-6 font-display text-3xl uppercase tracking-[0.12em] [text-shadow:2px_2px_0_var(--color-brand-primary)] sm:text-4xl">
+              Join the army
+            </p>
             <Link
               href="/shop"
-              className="relative mt-10 inline-block rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent hover:bg-white/90"
+              className="relative mt-8 inline-block rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent hover:bg-white/90"
             >
               Shop all tees
             </Link>
