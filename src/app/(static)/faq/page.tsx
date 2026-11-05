@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "FAQ" };
 const faqs = [
   {
     q: "How long until my order ships?",
-    a: "Shirts are printed to order. Most orders leave production in 2–5 business days, then transit time depends on the shipping option you choose.",
+    a: "Most orders ship within 2–5 business days; delivery time after that depends on the shipping option you choose.",
   },
   { q: "Do you ship outside the US?", a: "Not yet — we currently ship to US addresses only." },
   { q: "How do sizes run?", a: "Each product page lists the fit. If you are between sizes, we recommend sizing up." },

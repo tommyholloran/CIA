@@ -76,9 +76,9 @@ export function orderConfirmationEmail(o: OrderConfirmationInput, siteUrl: strin
     `<tr><td style="padding:3px 0;${bold ? "font-weight:700;font-size:16px;" : `color:${c.mutedForeground};`}">${label}</td><td align="right" style="padding:3px 0;${bold ? "font-weight:700;font-size:16px;" : ""}">${formatUsd(cents)}</td></tr>`;
 
   const html = layout(
-    `Order #${o.ref} confirmed — we're printing it now.`,
+    `Order #${o.ref} confirmed — we're getting it ready.`,
     `<h1 style="margin:0 0 8px;font-size:24px;">${esc(hi)}</h1>
-<p style="margin:0 0 20px;">Your order <strong>#${esc(o.ref)}</strong> is confirmed. Every shirt is printed to order, so it usually ships within a few business days. We'll email you tracking as soon as it does.</p>
+<p style="margin:0 0 20px;">Your order <strong>#${esc(o.ref)}</strong> is confirmed. It usually ships within a few business days. We'll email you tracking as soon as it does.</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">${rows}</table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;margin-top:12px;">
 ${total("Subtotal", o.subtotalCents)}
@@ -95,7 +95,7 @@ ${o.shipTo ? `<p style="margin:20px 0 0;color:${c.mutedForeground};font-size:14p
   const text = [
     hi,
     "",
-    `Your order #${o.ref} is confirmed. Every shirt is printed to order, so it usually ships within a few business days. We'll email you tracking as soon as it does.`,
+    `Your order #${o.ref} is confirmed. It usually ships within a few business days. We'll email you tracking as soon as it does.`,
     "",
     ...o.items.map((i) => `${i.description} x ${i.quantity}  ${formatUsd(i.amountCents)}`),
     "",

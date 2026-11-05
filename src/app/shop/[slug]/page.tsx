@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: PageProps<"/shop/[slug]">): P
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Product not found" };
   const description =
-    product.description?.slice(0, 160) ?? `${product.name} — printed to order and shipped across the US.`;
+    product.description?.slice(0, 160) ?? `${product.name} from ${brand.name}. Shipped across the US.`;
   const image = product.images[0]?.url ?? product.thumbnail;
   return {
     title: product.name,

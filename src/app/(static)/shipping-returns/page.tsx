@@ -10,8 +10,8 @@ export default function ShippingReturnsPage() {
     <ProsePage title="Shipping & Returns">
       <h2>Shipping</h2>
       <p>
-        We ship to US addresses. Every shirt is printed to order, which takes {PRODUCTION_DAYS.min}–{PRODUCTION_DAYS.max}{" "}
-        business days before it ships. Delivery estimates below include printing.
+        We ship to US addresses. Orders take {PRODUCTION_DAYS.min}–{PRODUCTION_DAYS.max} business days to prepare
+        before they ship. Delivery estimates below include that time.
       </p>
       <ul className="list-disc pl-5">
         {SHIPPING_OPTIONS.map((o) => (

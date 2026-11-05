@@ -5,7 +5,7 @@
  *
  * Keep every phrase TRUE (no "free shipping" etc. unless it is).
  */
-const DEFAULT_ITEMS = ["Join the army", "Crazy Ivan Army", "Printed to order", "Ships across the US"];
+const DEFAULT_ITEMS = ["Join the army", "Crazy Ivan Army", "Ships across the US"];
 
 export function Marquee({ items = DEFAULT_ITEMS }: { items?: string[] }) {
   // Repeat enough to overfill wide screens, then duplicate for a seamless loop.

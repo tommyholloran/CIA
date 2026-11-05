@@ -97,8 +97,7 @@ async function OrderSummary({ searchParams }: { searchParams: PageProps<"/order/
 
       {ship && (
         <p className="mt-8 text-sm text-muted-foreground">
-          Shipping to {[ship.city, ship.state].filter(Boolean).join(", ")}. Printed to order — most orders ship within a
-          few business days.
+          Shipping to {[ship.city, ship.state].filter(Boolean).join(", ")}. Most orders ship within a few business days.
         </p>
       )}
 
