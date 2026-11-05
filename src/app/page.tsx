@@ -22,10 +22,10 @@ export default async function HomePage() {
               height={941}
               priority
               sizes="(min-width: 768px) 320px, 60vw"
-              className="pointer-events-none absolute -top-10 left-[38%] h-[130%] w-auto max-w-none select-none opacity-25 sm:left-[42%]"
+              className="pointer-events-none absolute -top-10 left-[38%] h-[130%] w-auto max-w-none select-none opacity-30 drop-shadow-[7px_7px_0_var(--color-brand-primary)] sm:left-[42%]"
             />
             <h1 className="relative">
-              <Wordmark stacked className="text-[clamp(4.5rem,24vw,8.5rem)] leading-[0.95]" />
+              <Wordmark stacked className="text-[clamp(4.5rem,24vw,8.5rem)] leading-[0.95] [text-shadow:0.045em_0.045em_0_var(--color-brand-primary)]" />
             </h1>
             <Link
               href="/shop"
