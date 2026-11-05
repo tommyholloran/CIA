@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Product, Variant } from "@/lib/catalog/types";
 import { formatUsd } from "@/lib/money";
 import { useCart } from "@/components/cart/cart-provider";
@@ -31,6 +31,34 @@ export function ProductDetail({ product }: { product: Product }) {
 
   const sizeAvailable = (s: string) => findVariant(product, color, s)?.available ?? false;
   const priceCents = variant?.priceCents ?? product.minPriceCents;
+  const buttonLabel = needsSize ? "Select a size" : variant && !variant.available ? "Sold out" : "Add to cart";
+
+  const addToCart = () => {
+    if (!variant) return;
+    add({
+      variantId: variant.id,
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      color: variant.color,
+      size: variant.size,
+      image: variant.image ?? product.images[0]?.url ?? null,
+      priceCents: variant.priceCents,
+    });
+  };
+
+  // Phones: sticky add-to-cart bar while the main button is out of view.
+  const mainButtonRef = useRef<HTMLButtonElement>(null);
+  const sizePickerRef = useRef<HTMLFieldSetElement>(null);
+  const [showSticky, setShowSticky] = useState(false);
+  useEffect(() => {
+    const el = mainButtonRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    // Shown whenever the main button is off screen (below the fold on load, or scrolled past).
+    const io = new IntersectionObserver(([entry]) => setShowSticky(!entry.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <div className="grid gap-8 md:grid-cols-2 md:gap-12">
@@ -114,7 +142,7 @@ export function ProductDetail({ product }: { product: Product }) {
         )}
 
         {product.sizes.length > 0 && (
-          <fieldset className="mt-6">
+          <fieldset ref={sizePickerRef} className="mt-6 scroll-mt-24">
             <legend className="text-sm font-semibold">Size</legend>
             <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
               {product.sizes.map((s) => {
@@ -142,24 +170,13 @@ export function ProductDetail({ product }: { product: Product }) {
         )}
 
         <button
+          ref={mainButtonRef}
           type="button"
           disabled={!variant || !variant.available}
-          onClick={() => {
-            if (!variant) return;
-            add({
-              variantId: variant.id,
-              productId: product.id,
-              name: product.name,
-              slug: product.slug,
-              color: variant.color,
-              size: variant.size,
-              image: variant.image ?? product.images[0]?.url ?? null,
-              priceCents: variant.priceCents,
-            });
-          }}
-          className="mt-8 w-full rounded-full bg-brand-primary px-6 py-4 font-semibold text-brand-primary-foreground disabled:opacity-50"
+          onClick={addToCart}
+          className="btn-press mt-8 w-full rounded-full bg-brand-primary px-6 py-4 font-semibold text-brand-primary-foreground disabled:opacity-50"
         >
-          {needsSize ? "Select a size" : variant && !variant.available ? "Sold out" : "Add to cart"}
+          {buttonLabel}
         </button>
 
         {product.description && (
@@ -170,6 +187,33 @@ export function ProductDetail({ product }: { product: Product }) {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Sticky add-to-cart bar (phones only), shown while the main button is off screen. */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur transition-transform duration-300 md:hidden ${
+          showSticky ? "translate-y-0" : "pointer-events-none translate-y-full"
+        }`}
+        aria-hidden={!showSticky}
+        inert={!showSticky}
+      >
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{product.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {formatUsd(priceCents)}
+              {variant ? ` · ${[variant.color, variant.size].filter(Boolean).join(" / ")}` : ""}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => (needsSize ? sizePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }) : addToCart())}
+            disabled={!needsSize && (!variant || !variant.available)}
+            className="btn-press shrink-0 rounded-full bg-brand-primary px-5 py-3 text-sm font-semibold text-brand-primary-foreground disabled:opacity-50"
+          >
+            {buttonLabel}
+          </button>
+        </div>
       </div>
     </div>
   );

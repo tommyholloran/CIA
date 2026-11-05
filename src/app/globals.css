@@ -53,3 +53,58 @@ html:has(dialog[open]) {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Pizzazz ──────────────────────────────────────────────────────────────── */
+
+/* Scrolling ticker band. Content is duplicated once; sliding by -50% loops seamlessly. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 32s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Hero wordmark: each word slams in, staggered via inline animation-delay. */
+@keyframes slam-in {
+  0% { opacity: 0; transform: translateY(0.35em) scale(1.06); }
+  60% { opacity: 1; transform: translateY(-0.03em) scale(0.99); }
+  100% { opacity: 1; transform: none; }
+}
+.slam-in {
+  animation: slam-in 520ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+/* Hard-shadow buttons that press in. Shadow colour via --press-shadow. */
+.btn-press {
+  --press-shadow: var(--color-brand-accent);
+  box-shadow: 4px 4px 0 var(--press-shadow);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.btn-press:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--press-shadow);
+}
+.btn-press:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--press-shadow);
+}
+.on-dark .btn-press {
+  --press-shadow: var(--color-brand-primary);
+}
+
+/* The global reduced-motion rule shortens animations; for these, switch them off
+   entirely (an infinite marquee at 0.01ms would flicker). */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .slam-in {
+    animation: none !important;
+  }
+  .btn-press:hover:not(:disabled),
+  .btn-press:active:not(:disabled) {
+    transform: none;
+  }
+}

@@ -132,7 +132,7 @@ export function CartDrawer() {
               onClick={() => void checkout()}
               disabled={checkingOut || validation === "checking"}
               aria-busy={checkingOut}
-              className="mt-4 w-full rounded-full bg-brand-primary px-6 py-4 font-semibold text-brand-primary-foreground disabled:opacity-60"
+              className="btn-press mt-4 w-full rounded-full bg-brand-primary px-6 py-4 font-semibold text-brand-primary-foreground disabled:opacity-60"
             >
               {checkingOut ? "Redirecting to secure checkout…" : validation === "checking" ? "Checking prices…" : "Checkout"}
             </button>

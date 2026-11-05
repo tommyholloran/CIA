@@ -18,12 +18,12 @@ export function Wordmark({ className = "", stacked = false }: { className?: stri
   return (
     <span className={`block font-display uppercase ${className}`}>
       <span className="sr-only">{brand.name}</span>
-      {brand.name.split(" ").map((word) => (
-        <span key={word} className="block whitespace-nowrap" aria-hidden="true">
+      {brand.name.split(" ").map((word, i) => (
+        <span key={word} className="slam-in block whitespace-nowrap" style={{ animationDelay: `${i * 110}ms` }} aria-hidden="true">
           {word}
         </span>
       ))}
-      <span className="mt-[0.18em] block h-[0.09em] w-[1.6em] bg-brand-primary" aria-hidden="true" />
+      <span className="slam-in mt-[0.18em] block h-[0.09em] w-[1.6em] bg-brand-primary" style={{ animationDelay: "380ms" }} aria-hidden="true" />
     </span>
   );
 }
