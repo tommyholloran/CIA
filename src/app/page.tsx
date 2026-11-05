@@ -8,48 +8,40 @@ import { CourtBackdrop } from "@/components/court-backdrop";
 
 export default async function HomePage() {
   const featured = await getFeaturedProducts();
-  const heroImage = featured[0]?.images[0];
 
   return (
     <>
+      {/* Arena poster: spotlight glow, court floor in perspective, player standing on it, wordmark over. */}
       <section className="on-dark relative isolate overflow-hidden bg-brand-accent text-white">
-        {/* Angled court floor behind the wordmark and player (lowest layer). */}
-        <CourtBackdrop className="absolute -left-[45%] top-[2%] -z-10 h-[105%] w-[190%] sm:-left-[20%] sm:w-[120%] md:-left-[12%] md:top-[6%] md:h-[95%] md:w-[85%]" />
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-12 sm:pb-24 sm:pt-16 md:grid-cols-2">
-          <div className="relative">
-            {/* Decorative line art behind the wordmark. Faded so the letters stay readable. */}
-            <Image
-              src="/hero-player.png"
-              alt=""
-              aria-hidden="true"
-              width={520}
-              height={941}
-              priority
-              sizes="(min-width: 768px) 320px, 60vw"
-              className="pointer-events-none absolute -top-10 left-[38%] h-[130%] w-auto max-w-none select-none opacity-30 drop-shadow-[7px_7px_0_var(--color-brand-primary)] sm:left-[42%]"
-            />
-            <h1 className="relative">
-              <Wordmark stacked className="text-[clamp(4.5rem,24vw,8.5rem)] leading-[0.95] [text-shadow:0.045em_0.045em_0_var(--color-brand-primary)]" />
-            </h1>
-            <p style={{ animationDelay: "480ms" }} className="slam-in relative mt-6 font-display text-3xl uppercase tracking-[0.12em] [text-shadow:2px_2px_0_var(--color-brand-primary)] sm:text-4xl">
-              Join the army
-            </p>
-            <Link
-              href="/shop"
-              className="btn-press relative mt-8 inline-block rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent"
-            >
-              Shop all tees
-            </Link>
-          </div>
-          {heroImage && (
-            <Link
-              href={`/shop/${featured[0].slug}`}
-              className="relative hidden aspect-square overflow-hidden rounded-2xl bg-white/10 md:block"
-              aria-label={`Shop ${featured[0].name}`}
-            >
-              <Image src={heroImage.url} alt={heroImage.alt} fill priority sizes="(min-width: 1152px) 560px, 50vw" className="object-cover" />
-            </Link>
-          )}
+        {/* shade 2 of the two blues: a soft spotlight over the court */}
+        <div
+          className="pointer-events-none absolute inset-0 -z-20"
+          aria-hidden="true"
+          style={{ background: "radial-gradient(ellipse 55% 60% at 68% 42%, #1c4282 0%, rgba(28,66,130,0.35) 40%, transparent 72%)" }}
+        />
+        {/* court floor, anchored to the bottom so the player stands on it */}
+        <CourtBackdrop className="absolute -bottom-[38%] left-[62%] -z-10 h-[150%] w-[260%] -translate-x-1/2 md:left-[64%] md:h-[175%] md:w-[175%]" />
+        {/* player: the star on desktop; behind the wordmark on phones */}
+        <Image
+          src="/hero-player.png"
+          alt=""
+          aria-hidden="true"
+          width={520}
+          height={941}
+          priority
+          sizes="(min-width: 768px) 420px, 70vw"
+          className="pointer-events-none absolute bottom-0 right-[-14%] -z-10 h-[92%] w-auto max-w-none select-none opacity-35 drop-shadow-[6px_6px_0_var(--color-brand-primary)] sm:right-[-4%] md:right-[8%] md:h-[96%] md:opacity-90 lg:right-[12%]"
+        />
+        <div className="mx-auto flex min-h-[560px] max-w-6xl flex-col justify-center px-4 py-14 sm:min-h-[620px] md:min-h-[680px]">
+          <h1>
+            <Wordmark stacked className="text-[clamp(4.5rem,24vw,8.5rem)] leading-[0.95] [text-shadow:0.045em_0.045em_0_var(--color-brand-primary)]" />
+          </h1>
+          <p style={{ animationDelay: "480ms" }} className="slam-in mt-6 font-display text-3xl uppercase tracking-[0.12em] [text-shadow:2px_2px_0_var(--color-brand-primary)] sm:text-4xl">
+            Join the army
+          </p>
+          <Link href="/shop" className="btn-press mt-8 self-start rounded-full bg-white px-7 py-3.5 font-bold text-brand-accent">
+            Shop all tees
+          </Link>
         </div>
       </section>
       <Marquee />
