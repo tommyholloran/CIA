@@ -13,22 +13,24 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-border bg-muted">
-      <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-muted-foreground">
-        <nav aria-label="Footer">
-          <ul className="flex flex-wrap gap-x-6 gap-y-2">
+    <footer className="on-dark mt-auto bg-brand-accent text-white">
+      <div className="h-1.5 bg-brand-primary" aria-hidden="true" />
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <p className="font-display text-4xl uppercase tracking-[0.12em] [text-shadow:2px_2px_0_var(--color-brand-primary)] sm:text-5xl">
+          Join the army
+        </p>
+        <nav aria-label="Footer" className="mt-8 text-sm">
+          <ul className="flex flex-wrap gap-x-6 gap-y-3">
             {links.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className="hover:text-foreground">
+                <Link href={l.href} className="text-white/80 underline-offset-4 hover:text-white hover:underline">
                   {l.label}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
-        <p className="mt-6">
-          © {brand.name}. All rights reserved.
-        </p>
+        <p className="mt-8 text-sm text-white/70">© {brand.name}. All rights reserved.</p>
       </div>
     </footer>
   );
