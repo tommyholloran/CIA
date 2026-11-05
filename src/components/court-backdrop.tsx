@@ -5,8 +5,6 @@
  * end the key, free-throw circle (dashed inside the key), three-point arc,
  * backboard and rim. Generic court geometry: no team, school or league marks.
  */
-import { AerialPlay } from "./aerial-play";
-
 const LINE = "#2a5596"; // main lines
 const DASH = "#1f4580"; // dashed half of the free-throw circles (second blue)
 
@@ -39,8 +37,6 @@ export function CourtBackdrop({ className = "" }: { className?: string }) {
           <g transform="translate(940 0) scale(-1 1)">
             <End />
           </g>
-          {/* a fast break, from above; faded on phones where it sits behind the wordmark */}
-          <AerialPlay className="opacity-40 md:opacity-100" />
         </g>
       </svg>
     </div>
